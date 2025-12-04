@@ -21,6 +21,8 @@ type CurpResponse = {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
+const API_KEY = process.env.NEXT_PUBLIC_CURP_API_KEY || "";  
+
 export default function Home() {
   const [curp, setCurp] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,7 +44,8 @@ export default function Home() {
 
       const res = await fetch(`${API_BASE_URL}/api/curp/validate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+    "x-api-key": API_KEY, },
         body: JSON.stringify({ curp }),
       });
 

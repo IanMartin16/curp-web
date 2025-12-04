@@ -1,0 +1,137 @@
+// app/dashboard/page.tsx
+type StatsResponse = {
+  ok: boolean;
+  total: number;
+  byDay: Record<string, number>;
+  byKey: Record<string, number>;
+};
+
+async function fetchStats(): Promise<StatsResponse | null> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/api/admin/stats`, {
+      cache: "no-store",
+    });
+
+    // Si NEXT_PUBLIC_SITE_URL no está, usamos ruta relativa desde el servidor
+    if (!res.ok) {
+      console.error("Error al obtener stats:", res.status);
+      return null;
+    }
+
+    const data = (await res.json()) as StatsResponse;
+    return data;
+  } catch (e) {
+    console.error("Error fetchStats:", e);
+    return null;
+  }
+}
+
+export default async function DashboardPage() {
+  // truco: si NEXT_PUBLIC_SITE_URL no está, fetch relativo
+  const stats =
+    (await fetch("http://localhost:3000/api/admin/stats", { cache: "no-store" })
+      .then((r) => r.json())
+      .catch(() => null)) as StatsResponse | null;
+
+  if (!stats || !stats.ok) {
+    return (
+      <div className="min-h-screen bg-[#020817] text-white flex items-center justify-center">
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6 max-w-md text-center">
+          <h1 className="text-2xl font-semibold mb-2">Dashboard</h1>
+          <p className="text-sm text-gray-300">
+            No se pudieron obtener las estadísticas. Verifica que el backend esté
+            arriba y que el endpoint <code>/api/admin/stats</code> funcione.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const { total, byDay, byKey } = stats;
+
+  const days = Object.entries(byDay).sort(([a], [b]) => (a < b ? 1 : -1));
+  const keys = Object.entries(byKey);
+
+  return (
+    <div className="min-h-screen bg-[#020817] text-white px-4 py-8 md:px-12">
+      <header className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2">Dashboard de uso</h1>
+        <p className="text-gray-300">
+          Estadísticas de consumo de tu API de CURP en tiempo real.
+        </p>
+      </header>
+
+      {/* Cards resumen */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Consultas totales</p>
+          <p className="text-3xl font-semibold">{total}</p>
+        </div>
+
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Días con tráfico</p>
+          <p className="text-3xl font-semibold">{days.length}</p>
+        </div>
+
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">API Keys activas</p>
+          <p className="text-3xl font-semibold">{keys.length}</p>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Tabla por día */}
+        <section className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <h2 className="text-lg font-semibold mb-3">Consultas por día</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-gray-400">
+                <tr>
+                  <th className="text-left py-2 border-b border-[#1f2937]">Fecha</th>
+                  <th className="text-right py-2 border-b border-[#1f2937]">
+                    Consultas
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {days.map(([day, count]) => (
+                  <tr key={day}>
+                    <td className="py-2">{day}</td>
+                    <td className="py-2 text-right">{count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* Tabla por API key */}
+        <section className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <h2 className="text-lg font-semibold mb-3">Consultas por API key</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="text-gray-400">
+                <tr>
+                  <th className="text-left py-2 border-b border-[#1f2937]">
+                    API Key
+                  </th>
+                  <th className="text-right py-2 border-b border-[#1f2937]">
+                    Consultas
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {keys.map(([key, count]) => (
+                  <tr key={key}>
+                    <td className="py-2">{key}</td>
+                    <td className="py-2 text-right">{count as number}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
