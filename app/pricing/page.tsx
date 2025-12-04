@@ -117,21 +117,22 @@ export default function PricingPage() {
               </ul>
             </div>
 
-            <button
-              className={`mt-2 w-full text-sm font-medium py-2.5 rounded-xl border transition ${
-                plan.highlight
-                  ? "bg-emerald-500 text-black border-emerald-500 hover:bg-emerald-400"
-                  : "bg-transparent border-[#1f2937] text-gray-100 hover:border-emerald-500 hover:text-emerald-400"
-              }`}
-              // TODO: aquí luego conectamos Stripe / formulario de contacto
-              onClick={() => {
-                alert(
-                  "Esta es una demo. Más adelante aquí conectaremos Stripe o un formulario de contacto para este plan."
-                );
-              }}
-            >
-              {plan.cta}
-            </button>
+            {/* Por ahora botón “tonto”, sin onClick.
+                Más adelante aquí conectamos Stripe o un formulario */}
+            <div className="mt-2">
+              <button
+                className={`w-full text-sm font-medium py-2.5 rounded-xl border transition cursor-default ${
+                  plan.highlight
+                    ? "bg-emerald-500 text-black border-emerald-500"
+                    : "bg-transparent border-[#1f2937] text-gray-100"
+                }`}
+              >
+                {plan.cta}
+              </button>
+              <p className="mt-2 text-[11px] text-gray-400 text-center">
+                Próximamente: pago en línea y activación automática del plan.
+              </p>
+            </div>
           </div>
         ))}
       </section>
@@ -148,7 +149,8 @@ export default function PricingPage() {
         <p className="mb-1">
           Si necesitas un volumen específico o tienes requisitos especiales
           (por ejemplo, banca, fintech, gobierno), lo ideal es un plan Business
-          o Enterprise a la medida.
+          o Enterprise a la medida. Mientras tanto, puedes usar el plan Free o
+          Developer para ir integrando la API.
         </p>
       </section>
     </div>
