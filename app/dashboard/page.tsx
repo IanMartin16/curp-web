@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 type StatsResponse = {
   ok: boolean;
   total: number;
@@ -6,13 +5,17 @@ type StatsResponse = {
   byKey: Record<string, number>;
 };
 
-async function fetchStats(): Promise<StatsResponse | null> {
+async function getStats(): Promise<StatsResponse | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/api/admin/stats`, {
+    // En producción Vercel pone VERCEL_URL (sin protocolo)
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
+    const res = await fetch(`${baseUrl}/api/admin/stats`, {
       cache: "no-store",
     });
 
-    // Si NEXT_PUBLIC_SITE_URL no está, usamos ruta relativa desde el servidor
     if (!res.ok) {
       console.error("Error al obtener stats:", res.status);
       return null;
@@ -21,17 +24,13 @@ async function fetchStats(): Promise<StatsResponse | null> {
     const data = (await res.json()) as StatsResponse;
     return data;
   } catch (e) {
-    console.error("Error fetchStats:", e);
+    console.error("Error getStats:", e);
     return null;
   }
 }
 
 export default async function DashboardPage() {
-  // truco: si NEXT_PUBLIC_SITE_URL no está, fetch relativo
-  const stats =
-    (await fetch("http://localhost:3000/api/admin/stats", { cache: "no-store" })
-      .then((r) => r.json())
-      .catch(() => null)) as StatsResponse | null;
+  const stats = await getStats();
 
   if (!stats || !stats.ok) {
     return (
@@ -39,8 +38,8 @@ export default async function DashboardPage() {
         <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6 max-w-md text-center">
           <h1 className="text-2xl font-semibold mb-2">Dashboard</h1>
           <p className="text-sm text-gray-300">
-            No se pudieron obtener las estadísticas. Verifica que el backend esté
-            arriba y que el endpoint <code>/api/admin/stats</code> funcione.
+            No se pudieron obtener las estadísticas. Verifica que el backend
+            esté arriba y que el endpoint <code>/api/admin/stats</code> funcione.
           </p>
         </div>
       </div>
@@ -87,7 +86,9 @@ export default async function DashboardPage() {
             <table className="w-full text-sm">
               <thead className="text-gray-400">
                 <tr>
-                  <th className="text-left py-2 border-b border-[#1f2937]">Fecha</th>
+                  <th className="text-left py-2 border-b border-[#1f2937]">
+                    Fecha
+                  </th>
                   <th className="text-right py-2 border-b border-[#1f2937]">
                     Consultas
                   </th>

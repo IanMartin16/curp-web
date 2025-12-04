@@ -8,7 +8,8 @@ export async function GET() {
     return NextResponse.json(
       {
         ok: false,
-        error: "Faltan variables de entorno en el servidor (CURP_API_BASE_URL o ADMIN_API_KEY).",
+        error:
+          "Faltan variables de entorno en el servidor (CURP_API_BASE_URL o ADMIN_API_KEY).",
       },
       { status: 500 }
     );
