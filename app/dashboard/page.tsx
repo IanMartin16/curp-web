@@ -1,3 +1,5 @@
+// app/dashboard/page.tsx
+
 type StatsResponse = {
   ok: boolean;
   total: number;
@@ -6,12 +8,13 @@ type StatsResponse = {
 };
 
 async function getStats(): Promise<StatsResponse | null> {
-  try {
-    // En producción Vercel pone VERCEL_URL (sin protocolo)
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
+  // En prod usamos el dominio fijo de Vercel
+  const baseUrl =
+    process.env.NODE_ENV === "production"
+      ? "https://curp-web.vercel.app"
       : "http://localhost:3000";
 
+  try {
     const res = await fetch(`${baseUrl}/api/admin/stats`, {
       cache: "no-store",
     });
