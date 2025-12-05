@@ -4,56 +4,84 @@ import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
+const PRICES: Record<string, string | undefined> = {
+  developer: process.env.STRIPE_PRICE_DEV,
+  business: process.env.STRIPE_PRICE_BUS,
+};
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { plan, email } = body as { plan: "developer" | "business"; email?: string };
+    const plan = body?.plan as "developer" | "business" | "free" | undefined;
 
-    if (!plan) {
+    // El plan FREE no pasa por Stripe
+    if (plan === "free") {
       return NextResponse.json(
-        { ok: false, error: "Plan requerido" },
+        {
+          ok: false,
+          error: "El plan Free no requiere checkout",
+        },
         { status: 400 }
       );
     }
 
-    // Mapear plan → priceId de Stripe
-    const priceId =
-      plan === "developer"
-        ? process.env.STRIPE_PRICE_DEV
-        : process.env.STRIPE_PRICE_BUS;
-
-    if (!priceId) {
+    if (!plan || !PRICES[plan]) {
       return NextResponse.json(
-        { ok: false, error: "Price ID no configurado" },
+        {
+          ok: false,
+          error: `Plan inválido o price ID no configurado: ${plan}`,
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!process.env.STRIPE_SUCCESS_URL || !process.env.STRIPE_CANCEL_URL) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Faltan STRIPE_SUCCESS_URL o STRIPE_CANCEL_URL",
+        },
         { status: 500 }
       );
     }
 
-    const successUrl =
-      process.env.STRIPE_SUCCESS_URL ?? "https://curp-web.vercel.app/dashboard";
-    const cancelUrl =
-      process.env.STRIPE_CANCEL_URL ?? "https://curp-web.vercel.app/payment-failed";
-
+    // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      payment_method_types: ["card"],
       line_items: [
         {
-          price: priceId,
+          price: PRICES[plan]!,
           quantity: 1,
         },
       ],
-      success_url: successUrl + "?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: cancelUrl,
-      customer_email: email, // opcional: si se lo pides en la UI
+      success_url: process.env.STRIPE_SUCCESS_URL,
+      cancel_url: process.env.STRIPE_CANCEL_URL,
+      // Opcional: para luego relacionar con cliente
+      // customer_email: "test@example.com",
     });
 
-    return NextResponse.json({ ok: true, url: session.url });
-  } catch (error: any) {
-    console.error("Error en /api/checkout", error);
     return NextResponse.json(
-      { ok: false, error: "Error creando sesión de pago" },
+      {
+        ok: true,
+        url: session.url,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error en /api/checkout:", error);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Error interno creando la sesión de pago",
+      },
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { ok: false, error: "Método no permitido" },
+    { status: 405 }
+  );
 }
