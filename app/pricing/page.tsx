@@ -1,173 +1,154 @@
-// app/pricing/page.tsx
+"use client";
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    tagline: "Ideal para pruebas, demos y side projects.",
-    highlight: false,
-    cta: "Empezar gratis",
-    features: [
-      "Hasta 500 validaciones de CURP al mes",
-      "Sin tarjeta de crédito",
-      "Acceso al endpoint principal",
-      "Acceso a /docs",
-      "Sin SLA garantizado",
-    ],
-  },
-  {
-    name: "Developer",
-    price: "$199 MXN",
-    tagline: "Para desarrolladores y pequeños proyectos en producción.",
-    highlight: true,
-    cta: "Hablar con ventas",
-    features: [
-      "~50,000 validaciones de CURP al mes",
-      "Prioridad media en la cola de procesamiento",
-      "Acceso a logs y dashboard",
-      "Soporte por correo",
-      "Ideal para formularios de clientes y KYC básico",
-    ],
-  },
-  {
-    name: "Business",
-    price: "$599 MXN",
-    tagline: "Para equipos que necesitan volumen y estabilidad.",
-    highlight: false,
-    cta: "Hablar con ventas",
-    features: [
-      "Hasta 250,000 validaciones de CURP al mes",
-      "Dashboard y métricas avanzadas",
-      "Prioridad alta y mayor límite de rate limit",
-      "Soporte prioritario",
-      "Apto para bancos, fintechs y ERPs",
-    ],
-  },
-  {
-    name: "Enterprise",
-    price: "A la medida",
-    tagline: "Integraciones a la medida y alto volumen.",
-    highlight: false,
-    cta: "Agendar llamada",
-    features: [
-      "Millones de validaciones al mes",
-      "Contrato y SLA personalizados",
-      "Soporte dedicado",
-      "Ambientes separados (staging / prod)",
-      "Features a la medida",
-    ],
-  },
-];
+import { useState } from "react";
+import Link from "next/link";
 
-const handleCheckout = async (plan: "developer" | "business") => {
-  const res = await fetch("/api/checkout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ plan }),
-  });
-
-  const data = await res.json();
-  if (data.ok && data.url) {
-    window.location.href = data.url;
-  } else {
-    alert("Error iniciando pago");
-  }
-};
+type PlanId = "free" | "developer" | "business";
 
 export default function PricingPage() {
+  const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
+
+  const handleCheckout = async (plan: PlanId) => {
+    // Free no va a Stripe
+    if (plan === "free") {
+      window.location.href = "/docs";
+      return;
+    }
+
+    try {
+      setLoadingPlan(plan);
+
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+
+      const data = await res.json();
+
+      if (!data.ok || !data.url) {
+        console.error(data);
+        alert("No se pudo iniciar el pago. Intenta más tarde.");
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      console.error(err);
+      alert("Ocurrió un error iniciando el pago.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#020817] text-white px-4 md:px-12 py-10">
-      {/* Header */}
-      <header className="max-w-3xl mb-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-400 mb-2">
-          Pricing
-        </p>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+    <main className="min-h-screen bg-[#020817] text-white px-6 md:px-12 py-16">
+      <section className="max-w-5xl mx-auto text-center mb-14">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
           Planes simples para validar CURP en producción.
         </h1>
-        <p className="text-gray-300">
+        <p className="text-gray-300 text-sm md:text-base max-w-2xl mx-auto">
           Empieza con el plan Free para probar la API y cuando estés listo
           pásate a un plan de pago. Los límites y precios son orientativos:
           podremos ajustarlos contigo según tu volumen y caso de uso.
         </p>
-      </header>
+      </section>
 
-      {/* Cards */}
-      <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {plans.map((plan) => (
-          <div
-            key={plan.name}
-            className={`flex flex-col justify-between bg-[#020c1b] border rounded-2xl p-5 ${
-              plan.highlight
-                ? "border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.25)]"
-                : "border-[#1f2937]"
-            }`}
+      {/* Grid de planes */}
+      <section className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 md:gap-8">
+        {/* Free */}
+        <div className="rounded-2xl border border-[#1f2937] bg-[#020c1b] p-6 flex flex-col">
+          <h2 className="text-lg font-semibold mb-1">Free</h2>
+          <p className="text-gray-300 text-sm mb-4">
+            Ideal para pruebas, demos y side projects.
+          </p>
+
+          <p className="text-3xl font-bold mb-1">$0</p>
+          <p className="text-gray-400 text-xs mb-6">al mes</p>
+
+          <ul className="text-sm text-gray-200 space-y-2 mb-6">
+            <li>• Hasta 500 validaciones de CURP al mes</li>
+            <li>• Sin tarjeta de crédito</li>
+            <li>• Acceso al endpoint principal</li>
+            <li>• Acceso a /docs</li>
+            <li>• Sin SLA garantizado</li>
+          </ul>
+
+          <button
+            onClick={() => handleCheckout("free")}
+            className="mt-auto w-full rounded-xl border border-emerald-500 text-emerald-400 px-4 py-3 text-sm font-semibold hover:bg-emerald-500/10 transition"
           >
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">{plan.name}</h2>
-                {plan.highlight && (
-                  <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/40">
-                    Recomendado
-                  </span>
-                )}
-              </div>
+            Empezar gratis
+          </button>
+        </div>
 
-              <p className="text-sm text-gray-300 mb-4">{plan.tagline}</p>
+        {/* Developer (recomendado) */}
+        <div className="rounded-2xl border border-emerald-500 bg-[#020c1b] p-6 flex flex-col relative shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+          <span className="absolute -top-3 right-4 text-xs px-3 py-1 rounded-full bg-emerald-500 text-black font-semibold">
+            Recomendado
+          </span>
 
-              <div className="mb-4">
-                <p className="text-3xl font-bold">{plan.price}</p>
-                {plan.name !== "Enterprise" && (
-                  <p className="text-xs text-gray-400 mt-1">al mes</p>
-                )}
-              </div>
+          <h2 className="text-lg font-semibold mb-1">Developer</h2>
+          <p className="text-gray-300 text-sm mb-4">
+            Para desarrolladores y pequeños proyectos en producción.
+          </p>
 
-              <ul className="text-sm text-gray-300 space-y-2 mb-4">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <p className="text-3xl font-bold mb-1">$199 MXN</p>
+          <p className="text-gray-400 text-xs mb-6">al mes</p>
 
-            {/* Por ahora botón “tonto”, sin onClick.
-                Más adelante aquí conectamos Stripe o un formulario */}
-            <div className="mt-2">
-              <button
-                className={`w-full text-sm font-medium py-2.5 rounded-xl border transition cursor-default ${
-                  plan.highlight
-                    ? "bg-emerald-500 text-black border-emerald-500"
-                    : "bg-transparent border-[#1f2937] text-gray-100"
-                }`}
-              >
-                {plan.cta}
-              </button>
-              <p className="mt-2 text-[11px] text-gray-400 text-center">
-                Próximamente: pago en línea y activación automática del plan.
-              </p>
-            </div>
-          </div>
-        ))}
+          <ul className="text-sm text-gray-200 space-y-2 mb-6">
+            <li>• ~50,000 validaciones de CURP al mes</li>
+            <li>• Prioridad media en la cola de procesamiento</li>
+            <li>• Acceso a logs y dashboard</li>
+            <li>• Soporte por correo</li>
+            <li>• Ideal para formularios de clientes y KYC básico</li>
+          </ul>
+
+          <button
+            onClick={() => handleCheckout("developer")}
+            className="mt-auto w-full rounded-xl bg-emerald-500 text-black px-4 py-3 text-sm font-semibold hover:bg-emerald-400 transition disabled:opacity-60"
+            disabled={loadingPlan === "developer"}
+          >
+            {loadingPlan === "developer" ? "Redirigiendo..." : "Elegir plan Developer"}
+          </button>
+        </div>
+
+        {/* Business */}
+        <div className="rounded-2xl border border-[#1f2937] bg-[#020c1b] p-6 flex flex-col">
+          <h2 className="text-lg font-semibold mb-1">Business</h2>
+          <p className="text-gray-300 text-sm mb-4">
+            Para equipos que necesitan volumen y estabilidad.
+          </p>
+
+          <p className="text-3xl font-bold mb-1">$599 MXN</p>
+          <p className="text-gray-400 text-xs mb-6">al mes</p>
+
+          <ul className="text-sm text-gray-200 space-y-2 mb-6">
+            <li>• Hasta 500,000 validaciones de CURP al mes</li>
+            <li>• Prioridad alta en procesamiento</li>
+            <li>• SLA y soporte prioritario</li>
+            <li>• Acceso completo a logs, métricas y dashboard</li>
+            <li>• Integraciones y soporte técnico personalizado</li>
+          </ul>
+
+          <button
+            onClick={() => handleCheckout("business")}
+            className="mt-auto w-full rounded-xl border border-emerald-500 text-emerald-400 px-4 py-3 text-sm font-semibold hover:bg-emerald-500/10 transition disabled:opacity-60"
+            disabled={loadingPlan === "business"}
+          >
+            {loadingPlan === "business" ? "Redirigiendo..." : "Elegir plan Business"}
+          </button>
+        </div>
       </section>
 
-      {/* FAQ / nota final */}
-      <section className="mt-12 max-w-3xl text-sm text-gray-300">
-        <h3 className="text-lg font-semibold mb-2">¿Cómo funcionan los planes?</h3>
-        <p className="mb-3">
-          De momento estos planes son una referencia. La API ya está lista para
-          producción y puedes comenzar a usarla hoy mismo. Más adelante
-          integraremos sistema de usuarios, facturación y panel para que
-          administres tus propias API keys y consumos.
-        </p>
-        <p className="mb-1">
-          Si necesitas un volumen específico o tienes requisitos especiales
-          (por ejemplo, banca, fintech, gobierno), lo ideal es un plan Business
-          o Enterprise a la medida. Mientras tanto, puedes usar el plan Free o
-          Developer para ir integrando la API.
-        </p>
+      {/* Link de docs abajo, por si acaso */}
+      <section className="max-w-5xl mx-auto mt-12 text-center text-sm text-gray-400">
+        ¿Tienes dudas sobre los límites o necesitas un plan a la medida?{" "}
+        <Link href="/docs" className="text-emerald-400 underline">
+          Revisa la documentación o contáctanos
+        </Link>
+        .
       </section>
-    </div>
+    </main>
   );
 }
