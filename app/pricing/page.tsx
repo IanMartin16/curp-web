@@ -59,6 +59,21 @@ const plans = [
   },
 ];
 
+const handleCheckout = async (plan: "developer" | "business") => {
+  const res = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plan }),
+  });
+
+  const data = await res.json();
+  if (data.ok && data.url) {
+    window.location.href = data.url;
+  } else {
+    alert("Error iniciando pago");
+  }
+};
+
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-[#020817] text-white px-4 md:px-12 py-10">
