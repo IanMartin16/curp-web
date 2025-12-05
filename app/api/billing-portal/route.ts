@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: process.env.STRIPE_SUCCESS_URL ?? "https://curp-web.vercel.app/dashboard",
+      return_url:
+        process.env.STRIPE_SUCCESS_URL ??
+        "https://curp-web.vercel.app/dashboard",
     });
 
     return NextResponse.json({ ok: true, url: portalSession.url });
