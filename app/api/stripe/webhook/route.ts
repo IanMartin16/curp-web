@@ -1,62 +1,93 @@
 // app/api/stripe/webhook/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import type Stripe from "stripe";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
+import {
+  upsertSubscription,
+  deleteSubscription,
+  SubscriptionStatus,
+} from "@/lib/subscriptions";
 
-export const runtime = "nodejs";
+export const runtime = "nodejs";        // Importante para Stripe
+export const dynamic = "force-dynamic"; // Que no lo intente pre-generar
 
-export async function POST(req: NextRequest) {
-  const sig = req.headers.get("stripe-signature");
+export async function POST(req: Request) {
+  const body = await req.text(); // crudo, no json
+  const sig = headers().get("stripe-signature");
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!sig || !process.env.STRIPE_WEBHOOK_SECRET) {
-    return NextResponse.json({ ok: false, error: "Webhook no configurado" }, { status: 400 });
+  if (!sig || !webhookSecret) {
+    console.error("[WEBHOOK] Falta signature o STRIPE_WEBHOOK_SECRET");
+    return new NextResponse("Webhook misconfigured", { status: 500 });
   }
 
-  let event;
+  let event: Stripe.Event;
 
   try {
-    const body = await req.text(); // importante: text, no json
-    event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err: any) {
-    console.error("Error verificando webhook:", err.message);
-    return NextResponse.json({ ok: false, error: "Firma inválida" }, { status: 400 });
+    console.error("[WEBHOOK] Firma inválida:", err.message);
+    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        const session = event.data.object as any;
-        // Aquí puedes obtener:
-        const customerId = session.customer as string;
-        const email = session.customer_details?.email;
-        const subscriptionId = session.subscription as string;
+        const session = event.data.object as Stripe.Checkout.Session;
 
-        console.log("✅ Nueva suscripción activa:", { customerId, email, subscriptionId });
+        console.log("[WEBHOOK] checkout.session.completed", {
+          id: session.id,
+          customer: session.customer,
+          customer_email: session.customer_details?.email,
+          subscription: session.subscription,
+        });
 
-        // TODO: Aquí actualizarías tu BD:
-        // - Crear usuario si no existe
-        // - Guardar customerId, subscriptionId, plan, etc.
+        // Aquí normalmente haríamos cosas como:
+        // - crear usuario en tu BD
+        // - asociar API key a ese customer
+        break;
+      }
+
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+
+        const customerId = typeof sub.customer === "string"
+          ? sub.customer
+          : sub.customer.id;
+
+        const price = sub.items.data[0]?.price;
+
+        upsertSubscription({
+          customerId,
+          customerEmail:
+            typeof sub.customer === "string" ? undefined : sub.customer.email,
+          priceId: price?.id ?? "unknown",
+          status: sub.status as SubscriptionStatus,
+          currentPeriodEnd: sub.current_period_end,
+        });
+
         break;
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as any;
-        console.log("❌ Suscripción cancelada:", subscription.id);
+        const sub = event.data.object as Stripe.Subscription;
+        const customerId = typeof sub.customer === "string"
+          ? sub.customer
+          : sub.customer.id;
 
-        // TODO: desactivar API key o poner plan Free
+        deleteSubscription(customerId);
         break;
       }
 
       default:
-        console.log(`Evento no manejado: ${event.type}`);
+        console.log("[WEBHOOK] Evento ignorado:", event.type);
     }
 
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    console.error("Error procesando webhook:", error);
-    return NextResponse.json({ ok: false, error: "Error interno" }, { status: 500 });
+    return NextResponse.json({ received: true });
+  } catch (err: any) {
+    console.error("[WEBHOOK] Error procesando evento:", event.type, err);
+    return new NextResponse("Webhook handler failed", { status: 500 });
   }
 }
