@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.text(); // el body debe venir crudo
     const headersList = req.headers;
-    const sig = headersList.get("stripe-signature");
+    const sig = req.headers.get("stripe-signature");
 
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
