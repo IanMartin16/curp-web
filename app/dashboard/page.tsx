@@ -1,5 +1,10 @@
 // app/dashboard/page.tsx
 
+// app/dashboard/page.tsx
+export const dynamic = 'force-dynamic'
+export const revalidate = 0  
+
+
 type StatsResponse = {
   ok: boolean;
   total: number;

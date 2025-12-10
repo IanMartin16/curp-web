@@ -1,9 +1,15 @@
 // app/page.tsx
 
+//import { useState } from "react";
+import Link from "next/link";
+import { DemoSection } from "./components/DemoSection";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_CURP_API_BASE_URL || "";
+const API_KEY = process.env.NEXT_PUBLIC_CURP_API_KEY || "";
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#020817] text-white">
-
       {/* NAVBAR */}
       <nav className="flex items-center justify-between px-6 md:px-12 py-4 border-b border-[#1f2937]">
         <a href="/" className="text-xl font-bold">
@@ -41,7 +47,23 @@ export default function HomePage() {
           Perfecta para onboarding, formularios de clientes, automatizaciones internas y KYC.
         </p>
 
-        <ul className="text-gray-300 text-sm space-y-2 mb-10">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            href="#demo"
+            className="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg"
+          >
+            Probar API sin código
+          </Link>
+
+          <Link
+            href="/pricing"
+            className="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold border border-slate-600 text-slate-100 hover:bg-slate-800"
+          >
+            Ver planes y precios
+          </Link>
+        </div>
+
+        <ul className="text-gray-300 text-sm space-y-2 mb-10 mt-8">
           <li>✔ Respuestas inmediatas (avg &lt; 80 ms)</li>
           <li>✔ Validación de estructura, fecha de nacimiento, género y estado</li>
           <li>✔ Dashboard y métricas en tiempo real</li>
@@ -66,81 +88,80 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SECTION: Comercial Stripe-like */}
+      {/* DEMO WIDGET */}
+      <DemoSection />
+
+      {/* SECTION tipo Stripe */}
       <section className="mt-32 max-w-6xl mx-auto px-6 md:px-12 text-center">
+        <h2 className="text-4xl font-bold mb-6">
+          La forma más rápida y confiable de validar CURP en México.
+        </h2>
 
-       <h2 className="text-4xl font-bold mb-6">
-        La forma más rápida y confiable de validar CURP en México.
-       </h2>
-
-      <p className="text-gray-300 text-lg mb-12 max-w-3xl mx-auto">
-       Curpify ofrece una API ultra veloz, documentación clara y métricas en tiempo real.
-       Perfecta para onboarding, formularios, procesos de identidad y plataformas que requieren validación inmediata.
-      </p>
-
-      {/* FEATURES GRID */}
-       <div className="grid md:grid-cols-3 gap-8 text-left">
-
-       <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-         <h3 className="text-xl font-semibold mb-2">Validación instantánea</h3>
-         <p className="text-gray-300 text-sm">
-          Promedio menor a 80ms. Perfecto para formularios y procesos críticos.
-         </p>
-       </div>
-
-       <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-         <h3 className="text-xl font-semibold mb-2">Integración en minutos</h3>
-         <p className="text-gray-300 text-sm">
-          Ejemplos claros en cURL, Node, Python y PHP. Implementa rápido.
-         </p>
-       </div>
-
-       <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-         <h3 className="text-xl font-semibold mb-2">Validación completa</h3>
-         <p className="text-gray-300 text-sm">
-          Estructura, fecha, género, estado y dígito verificador.
+        <p className="text-gray-300 text-lg mb-12 max-w-3xl mx-auto">
+          Curpify ofrece una API ultra veloz, documentación clara y métricas en tiempo real.
+          Perfecta para onboarding, formularios, procesos de identidad y plataformas que requieren validación inmediata.
         </p>
-       </div>
 
-       <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-        <h3 className="text-xl font-semibold mb-2">Dashboard en tiempo real</h3>
-        <p className="text-gray-300 text-sm">
-          Métricas por día, por API key y consumo total.
-        </p>
-       </div>
+        {/* FEATURES GRID */}
+        <div className="grid md:grid-cols-3 gap-8 text-left">
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
+            <h3 className="text-xl font-semibold mb-2">Validación instantánea</h3>
+            <p className="text-gray-300 text-sm">
+              Promedio menor a 80ms. Perfecto para formularios y procesos críticos.
+            </p>
+          </div>
 
-       <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-        <h3 className="text-xl font-semibold mb-2">Diseñado para producción</h3>
-        <p className="text-gray-300 text-sm">
-         Logs internos, monitoreo y límites configurados.
-        </p>
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
+            <h3 className="text-xl font-semibold mb-2">Integración en minutos</h3>
+            <p className="text-gray-300 text-sm">
+              Ejemplos claros en cURL, Node, Python y PHP. Implementa rápido.
+            </p>
+          </div>
+
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
+            <h3 className="text-xl font-semibold mb-2">Validación completa</h3>
+            <p className="text-gray-300 text-sm">
+              Estructura, fecha, género, estado y dígito verificador.
+            </p>
+          </div>
+
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
+            <h3 className="text-xl font-semibold mb-2">Dashboard en tiempo real</h3>
+            <p className="text-gray-300 text-sm">
+              Métricas por día, por API key y consumo total.
+            </p>
+          </div>
+
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
+            <h3 className="text-xl font-semibold mb-2">Diseñado para producción</h3>
+            <p className="text-gray-300 text-sm">
+              Logs internos, monitoreo y límites configurados.
+            </p>
+          </div>
+
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
+            <h3 className="text-xl font-semibold mb-2">Escalable</h3>
+            <p className="text-gray-300 text-sm">
+              Desde 500 hasta millones de validaciones mensuales.
+            </p>
+          </div>
         </div>
 
-        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-         <h3 className="text-xl font-semibold mb-2">Escalable</h3>
-         <p className="text-gray-300 text-sm">
-          Desde 500 hasta millones de validaciones mensuales.
-         </p>
+        {/* CTA FINAL */}
+        <div className="mt-16">
+          <h3 className="text-2xl font-bold mb-4">¿Listo para comenzar?</h3>
+          <p className="text-gray-300 mb-6">
+            Curpify es gratis en el plan básico. Empieza a validar CURP hoy mismo.
+          </p>
+
+          <a
+            href="/pricing"
+            className="px-8 py-3 bg-emerald-500 text-black rounded-xl font-semibold hover:bg-emerald-400 transition"
+          >
+            Comenzar gratis
+          </a>
         </div>
-      </div>
-
-      {/* CTA FINAL */}
-      <div className="mt-16">
-       <h3 className="text-2xl font-bold mb-4">¿Listo para comenzar?</h3>
-       <p className="text-gray-300 mb-6">
-        Curpify es gratis en el plan básico. Empieza a validar CURP hoy mismo.
-       </p>
-
-      <a
-        href="/pricing"
-        className="px-8 py-3 bg-emerald-500 text-black rounded-xl font-semibold hover:bg-emerald-400 transition"
-      >
-        Comenzar gratis
-        </a>
-      </div>
-
-     </section>
-
+      </section>
 
       {/* BENEFICIOS */}
       <section className="mt-24 max-w-5xl mx-auto px-6 md:px-12">
@@ -173,44 +194,44 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* HISTORIA */}
       <section className="mt-24 max-w-4xl mx-auto px-6 md:px-12">
         <h2 className="text-3xl font-bold mb-4">Nuestra historia</h2>
 
         <p className="text-gray-300 mb-4">
-         Curpify nace como respuesta a una necesidad real: validar CURP de forma rápida,
-         clara y accesible. Miles de sistemas en México requieren validación de identidad,
-         pero se enfrentan a procesos lentos, manuales o poco confiables.
-      </p>
+          Curpify nace como respuesta a una necesidad real: validar CURP de forma rápida,
+          clara y accesible. Miles de sistemas en México requieren validación de identidad,
+          pero se enfrentan a procesos lentos, manuales o poco confiables.
+        </p>
 
-      <p className="text-gray-300 mb-4">
-       Nosotros creemos que la validación de identidad debe ser tan simple como hacer un
-       request a una API. Así comenzó Curpify: una plataforma pensada para desarrolladores,
-       optimizada para la velocidad y lista para producción.
-      </p>
+        <p className="text-gray-300 mb-4">
+          Nosotros creemos que la validación de identidad debe ser tan simple como hacer un
+          request a una API. Así comenzó Curpify: una plataforma pensada para desarrolladores,
+          optimizada para la velocidad y lista para producción.
+        </p>
 
-      <h3 className="text-2xl font-semibold mt-8 mb-3">Misión</h3>
-      <p className="text-gray-300 mb-4">
-       Hacer que la validación de identidad en México sea rápida, accesible y sencilla
-       para todos los desarrolladores.
-      </p>
+        <h3 className="text-2xl font-semibold mt-8 mb-3">Misión</h3>
+        <p className="text-gray-300 mb-4">
+          Hacer que la validación de identidad en México sea rápida, accesible y sencilla
+          para todos los desarrolladores.
+        </p>
 
-      <h3 className="text-2xl font-semibold mt-8 mb-3">Visión</h3>
-      <p className="text-gray-300 mb-4">
-       Construir la plataforma número uno de validación de identidad en México y
-       Latinoamérica, empezando por CURP y expandiéndonos hacia RFC, NSS, INE digital
-       y validaciones avanzadas.
-      </p>
+        <h3 className="text-2xl font-semibold mt-8 mb-3">Visión</h3>
+        <p className="text-gray-300 mb-4">
+          Construir la plataforma número uno de validación de identidad en México y
+          Latinoamérica, empezando por CURP y expandiéndonos hacia RFC, NSS, INE digital
+          y validaciones avanzadas.
+        </p>
 
-      <h3 className="text-2xl font-semibold mt-8 mb-3">Valores</h3>
-      <ul className="text-gray-300 space-y-2">
-      <li>✔ Simplicidad</li>
-      <li>✔ Velocidad</li>
-      <li>✔ Confiabilidad</li>
-      <li>✔ Transparencia</li>
-      <li>✔ Developer-first</li>
-      </ul>
+        <h3 className="text-2xl font-semibold mt-8 mb-3">Valores</h3>
+        <ul className="text-gray-300 space-y-2">
+          <li>✔ Simplicidad</li>
+          <li>✔ Velocidad</li>
+          <li>✔ Confiabilidad</li>
+          <li>✔ Transparencia</li>
+          <li>✔ Developer-first</li>
+        </ul>
       </section>
-
 
       {/* FOOTER */}
       <footer className="mt-24 py-10 border-t border-[#1f2937] text-center text-gray-400 text-sm">
@@ -219,3 +240,4 @@ export default function HomePage() {
     </div>
   );
 }
+
