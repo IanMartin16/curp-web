@@ -1,25 +1,20 @@
+// app/components/DemoSection.tsx
 "use client";
 
 import { useState } from "react";
 
-type CurpResponse = {
-  ok: boolean;
-  curp?: string;
-  isValid?: boolean;
-  data?: {
-    year: number;
-    month: number;
-    day: number;
-    gender: string;
-    state: string;
-  };
-  error?: string;
-};
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_CURP_API_BASE_URL ??
+  "https://curp-api-production.up.railway.app";
+
+// 👇 aseguramos que NUNCA sea undefined
+const DEMO_API_KEY =
+  process.env.NEXT_PUBLIC_CURP_DEMO_API_KEY ?? "cliente_demo_001";
 
 export function DemoSection() {
-  const [curp, setCurp] = useState("HECM740516HDFRSR08");
+  const [curp, setCurp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<CurpResponse | null>(null);
+  const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleValidate() {
@@ -28,23 +23,16 @@ export function DemoSection() {
     setResult(null);
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_CURP_API_BASE_URL ||
-        "https://curp-api-production.up.railway.app";
-
-      const apiKey =
-        process.env.NEXT_PUBLIC_CURP_API_KEY || "supersecreto_123";
-
-      const res = await fetch(`${baseUrl}/api/curp/validate`, {
+      const res = await fetch(`${API_BASE_URL}/api/curp/validate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": apiKey,
+          "x-api-key": DEMO_API_KEY,
         },
         body: JSON.stringify({ curp }),
       });
 
-      const data = (await res.json()) as CurpResponse;
+      const data = await res.json();
 
       if (!res.ok || data.ok === false) {
         setError(data.error || "No se pudo validar la CURP.");
@@ -52,12 +40,13 @@ export function DemoSection() {
         setResult(data);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Error en demo:", e);
       setError("Error de red, intenta de nuevo.");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <section
