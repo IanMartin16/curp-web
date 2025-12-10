@@ -35,44 +35,47 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-```mermaid
+## Arquitectura de Curpify
 
+```mermaid
 flowchart TD
 
-subgraph Cliente [Cliente / Usuario Final]
-    A0[Frontend Next.js - Vercel]
-    A1[Página de Pricing]
-    A2[Checkout Button]
-    A3[Dashboard de Uso]
-end
+  %% Cliente
+  subgraph Cliente[Cliente / Usuario Final]
+    A0[Frontend Next.js · Vercel]
+    A1[Página principal / Hero]
+    A2[Sección Demo · /#demo]
+    A3[Página de Pricing · /pricing]
+    A4[Dashboard de uso · /dashboard]
+  end
 
-subgraph Stripe [Stripe]
-    B1[Checkout Sessions]
-    B2[Payment Method]
-    B3[Customer Object]
-    B4[Subscription Object]
-    B5[Webhook Events]
-end
+  %% API de CURP
+  subgraph API[CURP API · Railway]
+    B1[Express Server]
+    B2[Ruta POST /api/curp/validate]
+    B3[Middleware x-api-key]
+    B4[Servicio de validación · curp-validator.ts]
+    B5[Logs a archivo · /logs/api.log y requests-YYYY-MM-DD.json]
+  end
 
-subgraph Backend [Backend Next.js API Routes]
-    C1[/api/checkout]
-    C2[/api/billing-portal]
-    C3[/api/stripe/webhook]
-    C4[/api/admin/stats]
-end
+  %% Stripe
+  subgraph Stripe[Stripe]
+    C1[Checkout Sessions]
+    C2[Payment Method]
+    C3[Customer / Subscription]
+    C4[Webhook Events]
+  end
 
-subgraph API_CURP [API de Validación - Railway]
-    D1[/api/validate]
-    D2[Logs de uso (memoria/KV)]
-    D3[Rate Limits por API Key]
-end
+  %% Frontend ↔ API CURP
+  A2 -->|"POST /api/curp/validate (demo sin código)"| B2
+  A3 -->|"Botón Pagar con Stripe"| C1
+  A4 -->|"GET /api/admin/stats"| B1
 
-%% Flujo de compra
-A2 --> |POST| C1 --> |create session| B1 --> |redirect URL| A2
-B1 --> B2 --> B3 --> B4
-B5 --> |payment.succeeded| C3
-B5 --> |customer.subscription.updated| C3
-C3 --> C4
+  %% Flujo interno de validación
+  B2 -->|"Verifica x-api-key"| B3
+  B3 -->|"Valida formato, fecha, estado, ofensivas"| B4
+  B4 -->|"Guarda log de request/response"| B5
 
-%% Flujo de validación de CURP
-A0 --> |fetch| D1 --> D2 --> C4 --> A3
+  %% Stripe Webhooks → API
+  C4 -->|"POST /api/stripe/webhook"| B1
+  B1 -->|"Actualiza estado de suscripción / plan"| A4
