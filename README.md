@@ -79,7 +79,9 @@ flowchart TD
   %% Stripe Webhooks → API
   C4 -->|"POST /api/stripe/webhook"| B1
   B1 -->|"Actualiza estado de suscripción / plan"| A4
+  
 
+###
 
 <!-- 1. Componentes principales -->
 
