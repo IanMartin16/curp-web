@@ -81,7 +81,7 @@ flowchart TD
   B1 -->|"Actualiza estado de suscripción / plan"| A4
 
 
-1. Componentes principales
+<!-- 1. Componentes principales -->
 
 1.Frontend (Curpify Web – Vercel)
 
