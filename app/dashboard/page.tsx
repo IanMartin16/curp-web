@@ -3,6 +3,7 @@
 // app/dashboard/page.tsx
 export const dynamic = 'force-dynamic'
 export const revalidate = 0  
+import { ApiKeysPanel } from "./ApiKeysPanel";
 
 
 type StatsResponse = {
@@ -50,6 +51,7 @@ export default async function DashboardPage() {
             esté arriba y que el endpoint <code>/api/admin/stats</code> funcione.
           </p>
         </div>
+        <ApiKeysPanel />
       </div>
     );
   }
