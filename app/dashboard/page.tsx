@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx
 
 // app/dashboard/page.tsx
 export const dynamic = 'force-dynamic'
@@ -56,10 +55,15 @@ export default async function DashboardPage() {
     );
   }
 
-  const { total, byDay, byKey } = stats;
+  const safe = stats ?? { total: 0, byDay: {}, byKey: {} };
+
+  const total = safe.total ?? 0;
+  const byDay = safe.byDay ?? {};
+  const byKey = safe.byKey ?? {};
 
   const days = Object.entries(byDay).sort(([a], [b]) => (a < b ? 1 : -1));
   const keys = Object.entries(byKey);
+
 
   return (
     <div className="min-h-screen bg-[#020817] text-white px-4 py-8 md:px-12">
