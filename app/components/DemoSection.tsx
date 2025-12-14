@@ -27,7 +27,7 @@ export function DemoSection() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": DEMO_API_KEY,
+//          "x-api-key": DEMO_API_KEY,
         },
         body: JSON.stringify({ curp }),
       });

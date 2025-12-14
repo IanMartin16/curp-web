@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-api-key": DEMO_KEY,   // ✅ la key demo NO se expone al navegador
+//        "x-api-key": DEMO_KEY,   // ✅ la key demo NO se expone al navegador
         "x-demo-ip": ip,         // ✅ para limitar por IP en Railway
       },
       body: JSON.stringify(body),
