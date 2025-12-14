@@ -1,4 +1,3 @@
-
 // app/dashboard/page.tsx
 export const dynamic = 'force-dynamic'
 export const revalidate = 0  
@@ -10,6 +9,8 @@ type StatsResponse = {
   total: number;
   byDay: Record<string, number>;
   byKey: Record<string, number>;
+  demoUsedToday?: number;
+  demoUniqueToday?: number;
 };
 
 async function getStats(): Promise<StatsResponse | null> {
@@ -60,6 +61,9 @@ export default async function DashboardPage() {
   const total = safe.total ?? 0;
   const byDay = safe.byDay ?? {};
   const byKey = safe.byKey ?? {};
+  const demoUsedToday = safe.demoUsedToday ?? 0;
+  const demoUniqueToday = safe.demoUniqueToday ?? 0;
+
 
   const days = Object.entries(byDay).sort(([a], [b]) => (a < b ? 1 : -1));
   const keys = Object.entries(byKey);
@@ -75,7 +79,7 @@ export default async function DashboardPage() {
       </header>
 
       {/* Cards resumen */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <section className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
         <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
           <p className="text-sm text-gray-400 mb-1">Consultas totales</p>
           <p className="text-3xl font-semibold">{total}</p>
@@ -90,7 +94,20 @@ export default async function DashboardPage() {
           <p className="text-sm text-gray-400 mb-1">API Keys activas</p>
           <p className="text-3xl font-semibold">{keys.length}</p>
         </div>
+
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Demos hoy</p>
+          <p className="text-3xl font-semibold">{demoUsedToday}</p>
+          <p className="text-xs text-gray-500 mt-1">Validaciones sin API key</p>
+        </div>
+
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-4">
+          <p className="text-sm text-gray-400 mb-1">Usuarios demo hoy</p>
+          <p className="text-3xl font-semibold">{demoUniqueToday}</p>
+          <p className="text-xs text-gray-500 mt-1">IPs únicas (anon)</p>
+        </div>
       </section>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Tabla por día */}
