@@ -17,7 +17,7 @@ async function getStats(): Promise<StatsResponse | null> {
   // En prod usamos el dominio fijo de Vercel
   const baseUrl =
     process.env.NODE_ENV === "production"
-      ? "https://curp-web.vercel.app"
+      ? "https://curpify.com"
       : "http://localhost:3000";
 
   try {

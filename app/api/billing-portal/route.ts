@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       return_url:
         process.env.STRIPE_SUCCESS_URL ??
-        "https://curp-web.vercel.app/dashboard",
+        "https://curpify.com/dashboard",
     });
 
     return NextResponse.json({ ok: true, url: portalSession.url });
