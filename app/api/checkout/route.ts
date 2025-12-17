@@ -56,6 +56,16 @@ export async function POST(req: NextRequest) {
       ],
       success_url: process.env.STRIPE_SUCCESS_URL,
       cancel_url: process.env.STRIPE_CANCEL_URL,
+
+      metadata: {
+        plan,
+      },
+      subscription_data: {
+        metadata: {
+          plan,
+        },
+      },
+
       // Opcional: para luego relacionar con cliente
       // customer_email: "test@example.com",
     });
