@@ -97,7 +97,7 @@ export default function PricingPage() {
           <p className="text-gray-400 text-xs mb-6">al mes</p>
 
           <ul className="text-sm text-gray-200 space-y-2 mb-6">
-            <li>• ~50,000 validaciones de CURP al mes</li>
+            <li>• ~10,000 validaciones de CURP al mes</li>
             <li>• Prioridad media en la cola de procesamiento</li>
             <li>• Acceso a logs y dashboard</li>
             <li>• Soporte por correo</li>
@@ -124,7 +124,7 @@ export default function PricingPage() {
           <p className="text-gray-400 text-xs mb-6">al mes</p>
 
           <ul className="text-sm text-gray-200 space-y-2 mb-6">
-            <li>• Hasta 500,000 validaciones de CURP al mes</li>
+            <li>• Hasta 50,000 validaciones de CURP al mes</li>
             <li>• Prioridad alta en procesamiento</li>
             <li>• SLA y soporte prioritario</li>
             <li>• Acceso completo a logs, métricas y dashboard</li>

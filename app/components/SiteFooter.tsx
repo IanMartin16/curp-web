@@ -9,7 +9,7 @@ export function SiteFooter() {
     <footer className="border-t border-slate-800 bg-[#020817] py-8 text-sm text-slate-400">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-center md:text-left">
-          Curpify © {year}. Develop by evi_link DEVS.
+          Curpify © {year}. Powered by evi_link devs.
         </p>
 
         <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs md:text-sm">

@@ -172,7 +172,7 @@ export default function HomePage() {
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
             <h3 className="text-xl font-semibold mb-2">Escalable</h3>
             <p className="text-gray-300 text-sm">
-              Desde 500 hasta millones de validaciones mensuales.
+              Desde 500 hasta miles de validaciones mensuales.
             </p>
           </div>
         </div>
