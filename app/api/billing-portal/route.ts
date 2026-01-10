@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       return_url:
         process.env.STRIPE_SUCCESS_URL ??
-        "https://curpify.com/dashboard",
+        "https://curpify.com/success",
     });
 
     return NextResponse.json({ ok: true, url: portalSession.url });

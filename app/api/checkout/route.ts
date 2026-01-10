@@ -45,6 +45,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const BASE_URL = process.env.APP_URL || "https://curpify.com";
+
     // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -54,8 +56,8 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: process.env.STRIPE_SUCCESS_URL,
-      cancel_url: process.env.STRIPE_CANCEL_URL,
+      success_url: `${BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${BASE_URL}/pricing?canceled=1`,
 
       metadata: {
         plan,
