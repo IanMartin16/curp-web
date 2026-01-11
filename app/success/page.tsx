@@ -1,8 +1,13 @@
 // app/success/page.tsx
+import { Suspense } from "react";
 import SuccessClient from "./success-client";
 
-export default function SuccessPage({ searchParams }: any) {
-  const sessionId = searchParams?.session_id as string | undefined;
-  return <SuccessClient sessionId={sessionId} />;
-}
+export const dynamic = "force-dynamic";
 
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 24 }}>Cargando...</div>}>
+      <SuccessClient />
+    </Suspense>
+  );
+}
