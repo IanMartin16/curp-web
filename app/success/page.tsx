@@ -6,9 +6,10 @@ export const dynamic = "force-dynamic"; // importante para que no lo intente pre
 export default function SuccessPage({
   searchParams,
 }: {
-  searchParams: { session_id?: string };
+  searchParams: { session_id?: string | string[]};
 }) {
-  const sessionId = searchParams?.session_id || null;
+  const raw = searchParams?.session_id;  
+  const sessionId = Array.isArray(raw) ? raw[0] : raw ?? null;
 
   return <SuccessClient sessionId={sessionId} />;
 }
