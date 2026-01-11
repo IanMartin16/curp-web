@@ -2,90 +2,100 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+function json(status: number, body: any) {
+  return NextResponse.json(body, { status });
+}
 
 export async function GET(req: NextRequest) {
   try {
     const sessionId = req.nextUrl.searchParams.get("session_id");
     if (!sessionId) {
-      return NextResponse.json({ ok: false, error: "Missing session_id" }, { status: 400 });
+      return json(400, { ok: false, error: "Missing session_id" });
     }
 
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["subscription", "customer"],
-    });
+    // 1) Trae la session desde Stripe (fuente de verdad)
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (session.payment_status !== "paid") {
-      return NextResponse.json(
-        { ok: false, error: `Payment not completed: ${session.payment_status}` },
-        { status: 402 }
-      );
-    }
-
-    const plan =
-      (session.metadata?.plan as "developer" | "business" | undefined) ||
-      ((session.subscription as any)?.metadata?.plan as "developer" | "business" | undefined);
-
+    // En suscripciones, normalmente vienen aquí:
     const subscriptionId =
-      typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
+      typeof session.subscription === "string" ? session.subscription : null;
 
     const customerId =
-      typeof session.customer === "string" ? session.customer : session.customer?.id;
+      typeof session.customer === "string" ? session.customer : null;
 
-    const email =
-      session.customer_details?.email ||
-      (typeof session.customer !== "string" ? (session.customer as any)?.email : null) ||
-      null;
+    const plan =
+      (session.metadata?.plan as "developer" | "business" | undefined) ?? undefined;
 
-    if (!plan || !subscriptionId) {
-      return NextResponse.json(
-        { ok: false, error: "Missing plan or subscriptionId in Stripe session" },
-        { status: 500 }
-      );
+    if (!subscriptionId || !plan) {
+      return json(400, {
+        ok: false,
+        error: "Missing subscriptionId or plan in Stripe session metadata",
+        debug: {
+          subscriptionId,
+          plan,
+          hasMetadata: !!session.metadata,
+        },
+      });
     }
 
-    const apiBase = process.env.CURP_API_BASE_URL; // ej: https://curp-api-production.up.railway.app
-    const internalSecret = process.env.INTERNAL_WEBHOOK_SECRET;
+    // 2) Llama a tu curp-api para crear/obtener la key (idempotente)
+    const CURP_API_BASE = process.env.CURP_API_BASE_URL; // ej: https://curp-api-production.up.railway.app
+    const INTERNAL_SECRET = process.env.INTERNAL_WEBHOOK_SECRET; // el mismo que validas en curp-api (x-internal-secret)
 
-    if (!apiBase || !internalSecret) {
-      return NextResponse.json(
-        { ok: false, error: "Missing CURP_API_BASE_URL or INTERNAL_WEBHOOK_SECRET" },
-        { status: 500 }
-      );
+    if (!CURP_API_BASE || !INTERNAL_SECRET) {
+      return json(500, {
+        ok: false,
+        error: "Missing CURP_API_BASE_URL or INTERNAL_WEBHOOK_SECRET in Vercel env",
+      });
     }
 
-    const r = await fetch(`${apiBase}/stripe/fulfill`, {
+    const fulfill = await fetch(`${CURP_API_BASE}/api/stripe/fulfill`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-internal-secret": internalSecret,
+        "x-internal-secret": INTERNAL_SECRET,
       },
       body: JSON.stringify({
         plan,
-        email,
+        email: session.customer_details?.email ?? null,
         customerId,
         subscriptionId,
         sessionId,
       }),
+      cache: "no-store",
     });
 
-    const data = await r.json();
+    // OJO: por si curp-api devuelve HTML por error, lo protegemos
+    const contentType = fulfill.headers.get("content-type") || "";
+    const text = await fulfill.text();
 
-    if (!r.ok || !data.ok) {
-      return NextResponse.json(
-        { ok: false, error: data?.error || "Fulfill failed" },
-        { status: 500 }
-      );
+    if (!contentType.includes("application/json")) {
+      return json(502, {
+        ok: false,
+        error: "curp-api returned non-JSON response",
+        debug: text.slice(0, 300),
+      });
     }
 
-    // data.key trae { id, key, plan, ... } (tu curp-api ya lo regresa)
-    return NextResponse.json({
+    const data = JSON.parse(text);
+
+    if (!fulfill.ok || !data.ok) {
+      return json(502, {
+        ok: false,
+        error: data?.error || "fulfill failed",
+        debug: data,
+      });
+    }
+
+    // data.key.key debe ser tu API key (depende cómo lo regreses)
+    return json(200, {
       ok: true,
-      apiKey: data.key?.key,
-      plan,
-      existing: data.existing === true,
+      apiKey: data.key?.key ?? null,
+      existing: data.existing ?? false,
     });
   } catch (e: any) {
-    console.error(e);
-    return NextResponse.json({ ok: false, error: e?.message || "Error" }, { status: 500 });
+    return json(500, { ok: false, error: e?.message || "complete failed" });
   }
 }
