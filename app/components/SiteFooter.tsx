@@ -10,6 +10,7 @@ export function SiteFooter() {
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-center md:text-left">
           Curpify © {year}. Powered by evi_link devs.
+          Contact: support@evilink.dev
         </p>
 
         <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs md:text-sm">

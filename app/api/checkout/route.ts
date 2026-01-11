@@ -47,6 +47,10 @@ export async function POST(req: NextRequest) {
 
     const BASE_URL = process.env.APP_URL || "https://curpify.com";
 
+    console.log("SUCCESS_URL =", process.env.STRIPE_SUCCESS_URL);
+    console.log("CANCEL_URL  =", process.env.STRIPE_CANCEL_URL);
+
+
     // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
