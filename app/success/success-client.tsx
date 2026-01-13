@@ -1,92 +1,67 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-type Status = "idle" | "loading" | "ok" | "error";
-
 export default function SuccessClient() {
   const sp = useSearchParams();
+  const sessionId = sp.get("session_id");
 
-  // ✅ lee session_id directo del URL
-  const sessionId = useMemo(() => sp.get("session_id"), [sp]);
-
-  const [status, setStatus] = useState<Status>("idle");
+  const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
-
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [masked, setMasked] = useState<string | null>(null);
-
-  const loading = status === "idle" || status === "loading";
+  const [firstTime, setFirstTime] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!sessionId) {
+      setLoading(false);
+      return;
+    }
 
-    let mounted = true;
+    let cancelled = false;
 
     (async () => {
-      setStatus("loading");
-      setErr(null);
-
-      const ac = new AbortController();
-      const t = setTimeout(() => ac.abort(), 15000); // 15s timeout
-
       try {
-        const r = await fetch(
-          `/api/stripe/complete?session_id=${encodeURIComponent(sessionId)}`,
-          { signal: ac.signal, cache: "no-store" }
-        );
+        setLoading(true);
+        setErr(null);
 
-        // 🔥 leer como texto primero (por si regresa HTML, redirect, etc.)
-        const txt = await r.text();
-        let data: any = null;
+        // timeout “suave”
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 12000);
 
-        try {
-          data = JSON.parse(txt);
-        } catch {
-          // no era JSON
+        const r = await fetch(`/api/stripe/complete?session_id=${encodeURIComponent(sessionId)}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        }).finally(() => clearTimeout(t));
+
+        const data = await r.json();
+        if (!r.ok || !data.ok) throw new Error(data?.error || "complete failed");
+
+        if (cancelled) return;
+
+        setFirstTime(!!data.firstTime);
+        setApiKey(data.apiKey ?? null);
+        setMasked(data.masked ?? null);
+        if (data.apiKey || null){
+          localStorage.setItem("curpify_api_key", data.apiKey);
         }
-
-        if (!r.ok) {
-          const msg = data?.error || txt?.slice?.(0, 200) || `HTTP ${r.status}`;
-          throw new Error(`HTTP ${r.status}: ${msg}`);
-        }
-
-        if (!data?.ok) {
-          throw new Error(data?.error || "complete failed");
-        }
-
-        // apiKey solo se muestra una vez si backend así lo manda
-        const key = data.apiKey ?? null;
-
-        // masked puede venir como "masked" o "apiKeyMasked" según tu backend
-        const m =
-          data.masked ??
-          data.apiKeyMasked ??
-          (key ? maskKey(key) : null);
-
-        if (!mounted) return;
-
-        setApiKey(key);
-        setMasked(m);
-        setStatus("ok");
       } catch (e: any) {
-        if (!mounted) return;
+        if (cancelled) return;
 
         if (e?.name === "AbortError") {
-          setErr("Timeout confirmando pago (15s). Reintenta recargando la página.");
+          setErr("Se tardó en confirmar. Recarga la página en unos segundos.");
         } else {
           setErr(e?.message || "error");
         }
-        setStatus("error");
       } finally {
-        clearTimeout(t);
+        if (!cancelled) setLoading(false);
       }
     })();
 
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, [sessionId]);
 
@@ -113,9 +88,9 @@ export default function SuccessClient() {
         <h1 className="text-2xl font-bold mb-2">✅ Pago exitoso</h1>
 
         {loading && <p className="text-slate-300">Preparando tu dashboard...</p>}
-        {status === "error" && err && <p className="text-red-400">{err}</p>}
+        {err && <p className="text-red-400">{err}</p>}
 
-        {status === "ok" && (
+        {!loading && !err && (
           <>
             <p className="text-slate-300 mb-4">
               Tu sesión quedó lista. Ahora puedes entrar al dashboard.
@@ -151,16 +126,16 @@ export default function SuccessClient() {
             >
               Ir al Dashboard
             </Link>
+
+            {firstTime === false && (
+              <p className="text-xs text-slate-400 mt-3">
+                Tip: si no copiaste tu key, aún puedes verla enmascarada en el dashboard.
+              </p>
+            )}
           </>
         )}
       </div>
     </div>
   );
-}
-
-// helper: enmascara una key (curp_xxx...yyy)
-function maskKey(key: string) {
-  if (key.length <= 10) return "********";
-  return `${key.slice(0, 8)}…${key.slice(-4)}`;
 }
 
