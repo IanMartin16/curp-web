@@ -6,12 +6,12 @@ export async function GET(req: NextRequest) {
     const apiKey = req.headers.get("x-api-key") || "";
     if (!apiKey) return NextResponse.json({ ok: false, error: "Missing API key" }, { status: 401 });
 
-    const days = req.nextUrl.searchParams.get("days") || "14";
+    const limit = req.nextUrl.searchParams.get("limit") || "10";
 
     const API_BASE = process.env.CURP_API_BASE_URL;
     if (!API_BASE) return NextResponse.json({ ok: false, error: "Missing CURP_API_BASE_URL" }, { status: 500 });
 
-    const r = await fetch(`${API_BASE}/api/dashboard/daily?days=${encodeURIComponent(days)}`, {
+    const r = await fetch(`${API_BASE}/api/dashboard/recent?limit=${encodeURIComponent(limit)}`, {
       headers: { "x-api-key": apiKey },
       cache: "no-store",
     });

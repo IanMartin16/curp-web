@@ -25,13 +25,21 @@ export default function DashboardClient() {
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [input, setInput] = useState("");
 
-  const [days, setDays] = useState<14 | 30 | 60>(14);
+  const [usageDays, setUsageDays] = useState<14 | 30 | 60>(14);
 
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   const [summary, setSummary] = useState<Summary | null>(null);
-  const [daily, setDaily] = useState<Daily | null>(null);
+  const [usageDaily, setUsageDaily] = useState<Daily | null>(null);
+
+  const [recent, setRecent] = useState<any[] | null>(null);
+  const [recentErr, setRecentErr] = useState<string | null>(null);
+
+  const [days, setDays] = useState(14);
+  const [daily, setDaily] = useState<{ day: string; used: number }[] | null>(null);
+  const [dailyErr, setDailyErr] = useState<string | null>(null);
+
   
 
   useEffect(() => {
@@ -41,19 +49,63 @@ export default function DashboardClient() {
 
   const [last, setLast] = useState<any>(null);
 
+    useEffect(() => {
+      if (!apiKey) return;
+
+      (async () => {
+        const r = await fetch("/api/dashboard/last", {
+          headers: { "x-api-key": apiKey },
+          cache: "no-store",
+        });
+        const data = await r.json();
+        if (data?.ok) setLast(data.item);
+      })();
+    }, [apiKey]);
+
+    useEffect(() => {
+    if (!apiKey) return;
+
+    (async () => {
+      try {
+        setDailyErr(null);
+        setDaily(null);
+
+        const r = await fetch(`/api/dashboard/daily?days=${days}`, {
+          headers: { "x-api-key": apiKey },
+          cache: "no-store",
+        });
+
+        const data = await r.json();
+        if (!r.ok || !data.ok) throw new Error(data?.error || "daily failed");
+
+        setDaily(data.items || []);
+      } catch (e: any) {
+        setDailyErr(e?.message || "error");
+        setDaily([]);
+      }
+    })();
+  }, [apiKey, days]);
+
+
   useEffect(() => {
     if (!apiKey) return;
 
     (async () => {
-      const r = await fetch("/api/dashboard/last", {
-        headers: { "x-api-key": apiKey },
-        cache: "no-store",
-      });
-      const data = await r.json();
-      if (data?.ok) setLast(data.item);
+      try {
+        setRecentErr(null);
+        const r = await fetch("/api/dashboard/recent?limit=10", {
+          headers: { "x-api-key": apiKey },
+          cache: "no-store",
+        });
+        const data = await r.json();
+        if (!r.ok || !data.ok) throw new Error(data?.error || "recent failed");
+        setRecent(data.items || []);
+      } catch (e: any) {
+        setRecentErr(e?.message || "error");
+        setRecent(null);
+      }
     })();
   }, [apiKey]);
-
 
   const maskedLocal = useMemo(() => {
     if (!apiKey) return null;
@@ -101,11 +153,11 @@ export default function DashboardClient() {
       if (!r2.ok || !di.ok) throw new Error(di.error || "No pude cargar daily");
 
       setSummary(s);
-      setDaily(di);
+      setUsageDaily(di);
     } catch (e: any) {
       setErr(e?.message || "Error");
       setSummary(null);
-      setDaily(null);
+      setUsageDaily(null);
     } finally {
       setLoading(false);
     }
@@ -113,9 +165,17 @@ export default function DashboardClient() {
 
   useEffect(() => {
     if (!apiKey) return;
-    loadData(apiKey, days);
+    loadData(apiKey, usageDays);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiKey, days]);
+  }, [apiKey, usageDays]);
+
+  function fmtDay(isoOrDate: string) {
+    // si viene "2026-01-13T00:00:00.000Z" o "2026-01-13"
+    const d = new Date(isoOrDate);
+    if (Number.isNaN(d.getTime())) return isoOrDate;
+    return d.toLocaleDateString("es-MX", { year: "numeric", month: "2-digit", day: "2-digit" });
+  }
+
 
   const masked = summary?.masked || maskedLocal;
 
@@ -136,7 +196,7 @@ export default function DashboardClient() {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
-                  onClick={() => loadData(apiKey, days)}
+                  onClick={() => loadData(apiKey, usageDays)}
                   className="bg-slate-200 text-black font-semibold rounded-lg px-4 py-2 text-sm hover:bg-white"
                   disabled={loading}
                 >
@@ -190,8 +250,8 @@ export default function DashboardClient() {
             <h2 className="font-semibold">Resumen del mes</h2>
 
             <select
-              value={days}
-              onChange={(e) => setDays(Number(e.target.value) as any)}
+              value={usageDays}
+              onChange={(e) => setUsageDays(Number(e.target.value) as any)}
               className="bg-black/30 border border-slate-700 rounded-lg px-3 py-2 text-sm"
               disabled={!apiKey}
             >
@@ -236,15 +296,108 @@ export default function DashboardClient() {
           )}
         </div>
 
+        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
+  <div className="flex items-center justify-between">
+    <h2 className="font-semibold">Uso diario</h2>
+
+    <div className="flex gap-2">
+      <button
+        onClick={() => setDays(14)}
+        className={`px-3 py-1 rounded-lg text-sm border ${days === 14 ? "bg-emerald-500 text-black border-emerald-500" : "border-slate-700 text-slate-200"}`}
+      >
+        14 días
+      </button>
+      <button
+        onClick={() => setDays(30)}
+        className={`px-3 py-1 rounded-lg text-sm border ${days === 30 ? "bg-emerald-500 text-black border-emerald-500" : "border-slate-700 text-slate-200"}`}
+      >
+        30 días
+      </button>
+    </div>
+  </div>
+
+  {dailyErr && <p className="text-red-400 text-sm mt-2">{dailyErr}</p>}
+
+  {!daily ? (
+    <p className="text-slate-400 text-sm mt-2">Cargando…</p>
+  ) : daily.length === 0 ? (
+    <p className="text-slate-400 text-sm mt-2">Aún no hay uso registrado.</p>
+  ) : (
+    <>
+      {/* mini barras */}
+      {(() => {
+        const max = Math.max(...daily.map((d) => d.used), 1);
+        return (
+          <div className="mt-4 space-y-2">
+            {daily.map((d) => (
+              <div key={d.day} className="flex items-center gap-3">
+                <div className="w-24 text-xs text-slate-400 font-mono">{d.day}</div>
+                <div className="flex-1 bg-black/30 rounded">
+                  <div
+                    className="h-3 rounded bg-emerald-500/80"
+                    style={{ width: `${Math.max(2, Math.round((d.used / max) * 100))}%` }}
+                    title={`${d.used}`}
+                  />
+                </div>
+                <div className="w-10 text-right text-xs text-slate-300">{d.used}</div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+    </>
+  )}
+</div>
+
+
         {/* Uso diario */}
         <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
           <h2 className="font-semibold mb-2">Uso por día</h2>
+
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
+            <h2 className="font-semibold mb-2">Últimas validaciones</h2>
+
+            {recentErr && <p className="text-red-400 text-sm">{recentErr}</p>}
+
+            {!recent ? (
+              <p className="text-slate-400 text-sm">Cargando…</p>
+             ) : recent.length === 0 ? (
+              <p className="text-slate-400 text-sm">Aún no hay historial.</p>
+            ) : (
+              <div className="overflow-auto">
+                <table className="w-full text-sm">
+                <thead className="text-slate-400">
+                  <tr>
+                    <th className="text-left py-2">Fecha</th>
+                    <th className="text-left py-2">CURP</th>
+                    <th className="text-left py-2">Resultado</th>
+                    <th className="text-left py-2">Status</th>
+                    <th className="text-left py-2">ms</th>
+                  </tr>
+                </thead>
+              <tbody>
+                {recent.map((it, idx) => (
+                  <tr key={idx} className="border-t border-slate-800">
+                    <td className="py-2">
+                      {new Date(it.ts).toLocaleString("es-MX")}
+                    </td>
+                    <td className="py-2 font-mono">{it.curpMasked}</td>
+                    <td className="py-2">{it.success ? "✅ válida" : "❌ inválida"}</td>
+                    <td className="py-2">{it.statusCode}</td>
+                    <td className="py-2">{it.durationMs ?? "-"}</td>
+                  </tr>
+                 ))}
+              </tbody>
+            </table>
+          </div>
+          )}
+        </div>
 
           {!apiKey ? (
             <p className="text-slate-400 text-sm">Guarda tu API key para ver el uso.</p>
           ) : loading && !daily ? (
             <p className="text-slate-300 text-sm">Cargando...</p>
-          ) : daily?.items?.length ? (
+          ) : usageDaily?.items?.length ? (
             <div className="overflow-auto">
               <table className="w-full text-sm">
                 <thead className="text-slate-400">
@@ -254,7 +407,7 @@ export default function DashboardClient() {
                   </tr>
                 </thead>
                 <tbody>
-                  {daily.items.map((it) => (
+                  {usageDaily.items.map((it) => (
                     <tr key={it.day} className="border-t border-slate-800">
                       <td className="py-2 font-mono">{it.day}</td>
                       <td className="py-2 text-right">{it.count}</td>
@@ -270,6 +423,7 @@ export default function DashboardClient() {
       </div>
     </div>
   );
+  
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
