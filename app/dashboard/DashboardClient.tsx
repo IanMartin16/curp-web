@@ -32,11 +32,28 @@ export default function DashboardClient() {
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [daily, setDaily] = useState<Daily | null>(null);
+  
 
   useEffect(() => {
     const k = localStorage.getItem("curpify_api_key");
     if (k) setApiKey(k);
   }, []);
+
+  const [last, setLast] = useState<any>(null);
+
+  useEffect(() => {
+    if (!apiKey) return;
+
+    (async () => {
+      const r = await fetch("/api/dashboard/last", {
+        headers: { "x-api-key": apiKey },
+        cache: "no-store",
+      });
+      const data = await r.json();
+      if (data?.ok) setLast(data.item);
+    })();
+  }, [apiKey]);
+
 
   const maskedLocal = useMemo(() => {
     if (!apiKey) return null;
@@ -182,6 +199,20 @@ export default function DashboardClient() {
               <option value={30}>Últimos 30 días</option>
               <option value={60}>Últimos 60 días</option>
             </select>
+          </div>
+
+          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
+            <h2 className="font-semibold mb-2">Última validación</h2>
+            {!last ? (
+              <p className="text-slate-400 text-sm">Aún no hay consultas registradas.</p>
+          ) : (
+            <div className="text-sm text-slate-200">
+              <div>CURP: <span className="font-mono">{last.curpMasked}</span></div>
+              <div>Status: {last.statusCode}</div>
+              <div>Resultado: {last.success ? "✅ válida" : "❌ inválida"}</div>
+              <div>Fecha: {new Date(last.createdAt).toLocaleString("es-MX")}</div>
+            </div>
+            )}
           </div>
 
           {!apiKey ? (
