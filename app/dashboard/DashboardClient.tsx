@@ -176,6 +176,15 @@ export default function DashboardClient() {
     return d.toLocaleDateString("es-MX", { year: "numeric", month: "2-digit", day: "2-digit" });
   }
 
+  function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-black/30 border border-slate-800 rounded-xl p-3">
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
 
   const masked = summary?.masked || maskedLocal;
 
@@ -236,6 +245,7 @@ export default function DashboardClient() {
             </>
           )}
         </div>
+        
 
         {/* Estado */}
         {err && (
@@ -349,88 +359,80 @@ export default function DashboardClient() {
   )}
 </div>
 
+        {/* Uso por día */}
+<div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
+  <div className="flex items-center justify-between">
+    <h2 className="font-semibold">Uso por día</h2>
+    {/* aquí tu selector de días si lo tienes */}
+  </div>
 
-        {/* Uso diario */}
-        <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
-          <h2 className="font-semibold mb-2">Uso por día</h2>
-
-          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
-            <h2 className="font-semibold mb-2">Últimas validaciones</h2>
-
-            {recentErr && <p className="text-red-400 text-sm">{recentErr}</p>}
-
-            {!recent ? (
-              <p className="text-slate-400 text-sm">Cargando…</p>
-             ) : recent.length === 0 ? (
-              <p className="text-slate-400 text-sm">Aún no hay historial.</p>
-            ) : (
-              <div className="overflow-auto">
-                <table className="w-full text-sm">
-                <thead className="text-slate-400">
-                  <tr>
-                    <th className="text-left py-2">Fecha</th>
-                    <th className="text-left py-2">CURP</th>
-                    <th className="text-left py-2">Resultado</th>
-                    <th className="text-left py-2">Status</th>
-                    <th className="text-left py-2">ms</th>
-                  </tr>
-                </thead>
-              <tbody>
-                {recent.map((it, idx) => (
-                  <tr key={idx} className="border-t border-slate-800">
-                    <td className="py-2">
-                      {new Date(it.ts).toLocaleString("es-MX")}
-                    </td>
-                    <td className="py-2 font-mono">{it.curpMasked}</td>
-                    <td className="py-2">{it.success ? "✅ válida" : "❌ inválida"}</td>
-                    <td className="py-2">{it.statusCode}</td>
-                    <td className="py-2">{it.durationMs ?? "-"}</td>
-                  </tr>
-                 ))}
-              </tbody>
-            </table>
-          </div>
-          )}
-        </div>
-
-          {!apiKey ? (
-            <p className="text-slate-400 text-sm">Guarda tu API key para ver el uso.</p>
-          ) : loading && !daily ? (
-            <p className="text-slate-300 text-sm">Cargando...</p>
-          ) : usageDaily?.items?.length ? (
-            <div className="overflow-auto">
-              <table className="w-full text-sm">
-                <thead className="text-slate-400">
-                  <tr>
-                    <th className="text-left py-2">Día</th>
-                    <th className="text-right py-2">Consultas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {usageDaily.items.map((it) => (
-                    <tr key={it.day} className="border-t border-slate-800">
-                      <td className="py-2 font-mono">{it.day}</td>
-                      <td className="py-2 text-right">{it.count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-slate-400 text-sm">Aún no hay uso registrado en este periodo.</p>
-          )}
-        </div>
-      </div>
+  {!apiKey ? (
+    <p className="text-slate-400 text-sm mt-2">Guarda tu API key para ver el uso.</p>
+  ) : dailyErr ? (
+    <p className="text-red-400 text-sm mt-2">{dailyErr}</p>
+  ) : !daily ? (
+    <p className="text-slate-400 text-sm mt-2">Cargando…</p>
+  ) : daily.length === 0 ? (
+    <p className="text-slate-400 text-sm mt-2">Aún no hay uso registrado en este periodo.</p>
+  ) : (
+    <div className="overflow-auto mt-3">
+      <table className="w-full text-sm">
+        <thead className="text-slate-400">
+          <tr>
+            <th className="text-left py-2">Día</th>
+            <th className="text-right py-2">Consultas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {daily.map((it: any) => (
+            <tr key={it.day} className="border-t border-slate-800">
+              <td className="py-2 font-mono">{fmtDay(it.day)}</td>
+              <td className="py-2 text-right">{it.count ?? it.used ?? 0}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-  );
-  
-}
+  )}
+</div>
 
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="bg-black/30 border border-slate-800 rounded-xl p-3">
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="text-lg font-semibold">{value}</p>
+{/* Últimas validaciones */}
+<div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-5">
+  <h2 className="font-semibold mb-2">Últimas validaciones</h2>
+
+  {recentErr && <p className="text-red-400 text-sm">{recentErr}</p>}
+
+  {!recent ? (
+    <p className="text-slate-400 text-sm">Cargando…</p>
+  ) : recent.length === 0 ? (
+    <p className="text-slate-400 text-sm">Aún no hay historial.</p>
+  ) : (
+    <div className="overflow-auto">
+      <table className="w-full text-sm">
+        <thead className="text-slate-400">
+          <tr>
+            <th className="text-left py-2">Fecha</th>
+            <th className="text-left py-2">CURP</th>
+            <th className="text-left py-2">Resultado</th>
+            <th className="text-left py-2">Status</th>
+            <th className="text-left py-2">ms</th>
+          </tr>
+        </thead>
+        <tbody>
+          {recent.map((it: any, idx: number) => (
+            <tr key={idx} className="border-t border-slate-800">
+              <td className="py-2">{new Date(it.ts).toLocaleString("es-MX", { hour12: true })}</td>
+              <td className="py-2 font-mono">{it.curpMasked ?? it.curp ?? "-"}</td>
+              <td className="py-2">{it.success ? "✅ válida" : "❌ inválida"}</td>
+              <td className="py-2">{it.statusCode ?? it.status_code ?? "-"}</td>
+              <td className="py-2">{it.durationMs ?? it.duration_ms ?? "-"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
-  );
-}
+  )}
+</div>
+</div>
+</div>
+)};
