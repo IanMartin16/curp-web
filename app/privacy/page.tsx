@@ -46,7 +46,7 @@ export default function PrivacyPage() {
 
           <h2 className="text-xl font-semibold">5. Contacto</h2>
           <p>
-            Para preguntas de privacidad: <b>support@curpify.com</b>.
+            Para preguntas de privacidad: <b>support@evilink.dev</b>.
           </p>
         </section>
       </div>

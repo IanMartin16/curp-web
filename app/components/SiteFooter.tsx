@@ -11,7 +11,7 @@ export function SiteFooter() {
         <p className="text-center md:text-left">
           Curpify © {year}. Powered by evi_link devs.
         </p>
-        <p className="font-mono text-emerald-400 text-sm">support@curpify.com</p>
+        <p className="font-mono text-emerald-400 text-sm">support@evilink.dev</p>
 
         <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs md:text-sm">
           <Link href="/docs" className="hover:text-slate-200">

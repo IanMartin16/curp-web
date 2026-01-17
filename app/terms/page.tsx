@@ -52,7 +52,7 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-semibold">6. Contacto</h2>
           <p>
-            Para soporte: <b>support@curpify.com</b>.
+            Para soporte: <b>support@evilink.dev</b>.
           </p>
         </section>
       </div>

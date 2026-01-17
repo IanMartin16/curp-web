@@ -21,7 +21,7 @@ export default function SupportPage() {
 
         <div className="rounded-xl border border-[#1f2937] bg-[#020c1b] p-5">
           <p className="text-slate-300 text-sm mb-1">Correo de soporte</p>
-          <p className="font-mono text-emerald-400 text-sm">support@curpify.com</p>
+          <p className="font-mono text-emerald-400 text-sm">support@evilink.dev</p>
           <p className="text-slate-400 text-xs mt-3">
             Horario: Lunes a Viernes (MX). Para temas urgentes de Business, indica “URGENTE” en el asunto.
           </p>
