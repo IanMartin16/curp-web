@@ -23,13 +23,17 @@ export function DemoSection() {
     setResult(null);
 
     try {
+
+      const c = curp.trim().toUpperCase();
+      if (!c) throw new Error("Pon una CURP");
+
       const res = await fetch(`${API_BASE_URL}/api/curp/validate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
 //          "x-api-key": DEMO_API_KEY,
         },
-        body: JSON.stringify({ curp }),
+        body: JSON.stringify({ curp: c }),
       });
 
       const data = await res.json();
@@ -70,7 +74,7 @@ export function DemoSection() {
           <input
             value={curp}
             onChange={(e) => setCurp(e.target.value.toUpperCase())}
-            placeholder="HECM740516HDFRSR08"
+            placeholder="BUMA920505MDFJLK09"
             className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <button
@@ -116,7 +120,7 @@ export function DemoSection() {
         {/* CURPs DE EJEMPLO RÁPIDO */}
         <div className="flex flex-wrap gap-2 text-xs text-slate-400">
           <span className="text-slate-500 mr-2">Ejemplos:</span>
-          {["HECM740516HDFRSR08", "GOCJ800101HDFLNS09", "BEAJ900202MDFRRL05"].map(
+          {["BUMA920505MDFJLK09", "GOCJ800101HDFLNS09", "BEAJ900202MDFRRL05"].map(
             (sample) => (
               <button
                 key={sample}

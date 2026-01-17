@@ -259,7 +259,7 @@ export default function HomePage() {
 {`curl -X POST https://curp-api-production.up.railway.app/api/curp/validate \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: TU_API_KEY_AQUI" \\
-  -d '{ "curp": "HECM740516HDFRSR08" }'`}
+  -d '{ "curp": "BUMA920505MDFJLK09" }'`}
             </pre>
           </div>
 

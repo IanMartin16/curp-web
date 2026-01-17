@@ -1,19 +1,54 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type PlanId = "free" | "developer" | "business";
 
 export default function PricingPage() {
   const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
+  const router = useRouter();
+  const [loadingFree, setLoadingFree] = useState(false);
 
-  const handleCheckout = async (plan: PlanId) => {
-    // Free no va a Stripe
-    if (plan === "free") {
-      window.location.href = "/docs";
-      return;
+  // ✅ FREE: crea key y manda a dashboard
+  const handleFreeKey = async () => {
+    try {
+      setLoadingFree(true);
+
+      // Este endpoint lo montamos en CURP-API:
+      // POST https://curp-api.../api/keys/free
+      // En curp-web lo ideal es tener un proxy /api/free-key.
+      const r = await fetch("/api/free-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await r.json();
+
+      if (!r.ok || !data?.ok || !data?.item?.key) {
+        console.error(data);
+        alert(data?.error || "No pude generar tu API key gratis. Intenta otra vez.");
+        return;
+      }
+
+      localStorage.setItem("curpify_api_key", data.item.key);
+
+      // opcional: también guarda masked para UI rápida
+      if (data.item.key_masked) localStorage.setItem("curpify_api_key_masked", data.item.key_masked);
+
+      router.push("/dashboard");
+    } catch (e) {
+      console.error(e);
+      alert("Error generando tu API key gratis.");
+    } finally {
+      setLoadingFree(false);
     }
+  };
+
+  // ✅ STRIPE: solo developer/business
+  const handleCheckout = async (plan: PlanId) => {
+    if (plan === "free") return; // ya no usamos esto para free
 
     try {
       setLoadingPlan(plan);
@@ -32,7 +67,7 @@ export default function PricingPage() {
         return;
       }
 
-      window.location.href = data.url;
+      router.push(data.url);
     } catch (err) {
       console.error(err);
       alert("Ocurrió un error iniciando el pago.");
@@ -41,6 +76,7 @@ export default function PricingPage() {
     }
   };
 
+
   return (
     <main className="min-h-screen bg-[#020817] text-white px-6 md:px-12 py-16">
       <section className="max-w-5xl mx-auto text-center mb-14">
@@ -48,39 +84,49 @@ export default function PricingPage() {
           Planes simples para validar CURP en producción.
         </h1>
         <p className="text-gray-300 text-sm md:text-base max-w-2xl mx-auto">
-          Empieza con el plan Free para probar la API y cuando estés listo
-          pásate a un plan de pago. Los límites y precios son orientativos:
-          podremos ajustarlos contigo según tu volumen y caso de uso.
+          Empieza con Free para probar la API. Si ya vas en serio, sube a Developer o Business.
+          Cancelas cuando quieras desde Stripe.
         </p>
+
       </section>
 
       {/* Grid de planes */}
       <section className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 md:gap-8">
-        {/* Free */}
-        <div className="rounded-2xl border border-[#1f2937] bg-[#020c1b] p-6 flex flex-col">
-          <h2 className="text-lg font-semibold mb-1">Free</h2>
-          <p className="text-gray-300 text-sm mb-4">
-            Ideal para pruebas, demos y side projects.
-          </p>
 
-          <p className="text-3xl font-bold mb-1">$0</p>
-          <p className="text-gray-400 text-xs mb-6">al mes</p>
+      {/* Free */}
+      <div className="rounded-2xl border border-[#1f2937] bg-[#020c1b] p-6 flex flex-col">
+        <h2 className="text-lg font-semibold mb-1">Free</h2>
+        <p className="text-gray-300 text-sm mb-4">
+        Ideal para pruebas rápidas.
+        </p>
 
-          <ul className="text-sm text-gray-200 space-y-2 mb-6">
-            <li>• Hasta 500 validaciones de CURP al mes</li>
-            <li>• Sin tarjeta de crédito</li>
-            <li>• Acceso al endpoint principal</li>
-            <li>• Acceso a /docs</li>
-            <li>• Sin SLA garantizado</li>
-          </ul>
+        <p className="text-3xl font-bold mb-1">$0</p>
+        <p className="text-gray-400 text-xs mb-6">al mes</p>
 
-          <button
-            onClick={() => handleCheckout("free")}
-            className="mt-auto w-full rounded-xl border border-emerald-500 text-emerald-400 px-4 py-3 text-sm font-semibold hover:bg-emerald-500/10 transition"
+      <ul className="text-sm text-gray-200 space-y-2 mb-6">
+        <li>• Hasta 50 validaciones al mes</li>
+        <li>• Dashboard de uso (con API key)</li>
+        <li>• Sin tarjeta de crédito</li>
+        <li>• Acceso a /docs</li>
+      </ul>
+
+      {/* CTA principal: crear key gratis */}
+        <button
+          onClick={handleFreeKey}
+          disabled={loadingFree}
+          className="mt-auto w-full rounded-xl bg-emerald-500 text-black px-4 py-3 text-sm font-semibold hover:bg-emerald-400 transition disabled:opacity-60"
           >
-            Empezar gratis
-          </button>
-        </div>
+          {loadingFree ? "Creando tu API key..." : "Crear API key gratis"}
+        </button>
+
+      {/* CTA secundario: demo */}
+        <button
+          onClick={() => router.push("/demo")}
+          className="mt-3 w-full rounded-xl border border-slate-600 text-slate-200 px-4 py-3 text-sm font-semibold hover:bg-slate-700/30 transition"
+          >
+          Try demo (sin API key)
+        </button>
+      </div>
 
         {/* Developer (recomendado) */}
         <div className="rounded-2xl border border-emerald-500 bg-[#020c1b] p-6 flex flex-col relative shadow-[0_0_40px_rgba(16,185,129,0.3)]">
@@ -90,18 +136,18 @@ export default function PricingPage() {
 
           <h2 className="text-lg font-semibold mb-1">Developer</h2>
           <p className="text-gray-300 text-sm mb-4">
-            Para desarrolladores y pequeños proyectos en producción.
+            Para desarrolladores y proyectos chicos en producción.
           </p>
 
           <p className="text-3xl font-bold mb-1">$199 MXN</p>
           <p className="text-gray-400 text-xs mb-6">al mes</p>
 
           <ul className="text-sm text-gray-200 space-y-2 mb-6">
-            <li>• ~10,000 validaciones de CURP al mes</li>
-            <li>• Prioridad media en la cola de procesamiento</li>
-            <li>• Acceso a logs y dashboard</li>
+            <li>• Hasta <b>5,000</b> validaciones de CURP al mes</li>
+            <li>• Dashboard de uso</li>
+            <li>• Logs y métricas básicas</li>
             <li>• Soporte por correo</li>
-            <li>• Ideal para formularios de clientes y KYC básico</li>
+            <li>• Ideal para formularios y KYC básico</li>
           </ul>
 
           <button
@@ -124,11 +170,11 @@ export default function PricingPage() {
           <p className="text-gray-400 text-xs mb-6">al mes</p>
 
           <ul className="text-sm text-gray-200 space-y-2 mb-6">
-            <li>• Hasta 50,000 validaciones de CURP al mes</li>
-            <li>• Prioridad alta en procesamiento</li>
-            <li>• SLA y soporte prioritario</li>
-            <li>• Acceso completo a logs, métricas y dashboard</li>
-            <li>• Integraciones y soporte técnico personalizado</li>
+            <li>• Hasta <b>50,000</b> validaciones de CURP al mes</li>
+            <li>• Prioridad alta</li>
+            <li>• Dashboard + logs + métricas</li>
+            <li>• Soporte prioritario</li>
+            <li>• Integraciones / soporte técnico</li>
           </ul>
 
           <button
@@ -141,13 +187,13 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* Link de docs abajo, por si acaso */}
+      {/* Link de docs abajo */}
       <section className="max-w-5xl mx-auto mt-12 text-center text-sm text-gray-400">
-        ¿Tienes dudas sobre los límites o necesitas un plan a la medida?{" "}
-        <Link href="/docs" className="text-emerald-400 underline">
-          Revisa la documentación o contáctanos
-        </Link>
-        .
+        ¿Dudas o necesitas un plan a la medida?{" "}
+        <a href="/docs" className="text-emerald-400 underline">
+          Revisa la documentación
+        </a>{" "}
+        o escríbenos a <span className="text-slate-200">support@evilink.dev</span>.
       </section>
     </main>
   );

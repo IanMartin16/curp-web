@@ -1,0 +1,8 @@
+html, body { background: #020817 !important; }
+.swagger-ui { color: #e5e7eb !important; }
+.swagger-ui .opblock { background: #0b1220 !important; border-color: #1f2937 !important; }
+.swagger-ui .scheme-container { background: #020817 !important; box-shadow: none !important; }
+.swagger-ui .info .title, .swagger-ui .info p { color: #e5e7eb !important; }
+.swagger-ui .model-box, .swagger-ui .responses-inner, .swagger-ui .example { background: #0b1220 !important; }
+.swagger-ui .microlight { background: #0b1220 !important; color: #e5e7eb !important; }
+.swagger-ui select, .swagger-ui input { background: #0b1220 !important; color: #e5e7eb !important; }

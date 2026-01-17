@@ -1,0 +1,225 @@
+openapi: 3.1.0
+info:
+  title: Curpify API
+  version: 1.0.0
+  description: >
+    API para validar CURP localmente y extraer datos básicos (fecha, género, entidad).
+
+    **Autenticación**
+    - Modo cliente: requiere header `x-api-key: curp_...`
+    - Modo demo: puede permitir requests sin key (si tu API lo habilita) con límite estricto por IP.
+
+    **Rate limits por plan (mensual)**
+    - Free: 50/mes
+    - Developer: 5,000/mes
+    - Business: 50,000/mes
+
+    **Demo (sin key)**
+    - 5/día por IP (para /demo)
+
+servers:
+  - url: https://curp-api-production.up.railway.app
+
+tags:
+  - name: CURP
+    description: Validación y parsing de CURP
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /api/curp/validate:
+    post:
+      tags: [CURP]
+      summary: Validar CURP
+      description: >
+        Valida estructura de CURP y extrae datos básicos.
+        En modo cliente requiere `x-api-key`.
+        En modo demo (si está habilitado) puede funcionar sin key con límite 5/día por IP.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: header
+          name: x-api-key
+          required: false
+          schema:
+            type: string
+          description: API Key del cliente (curp_...). Si no se envía, puede aplicar modo demo.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ValidateRequest"
+            examples:
+              valid:
+                summary: CURP válida
+                value:
+                  curp: "GODE561231HDFRRN09"
+      responses:
+        "200":
+          description: Validación exitosa (la CURP puede ser válida o inválida)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidateResponse"
+              examples:
+                okValid:
+                  value:
+                    ok: true
+                    curp: "GODE561231HDFRRN09"
+                    isValid: true
+                    data:
+                      year: 1956
+                      month: 12
+                      day: 31
+                      gender: "H"
+                      state: "DF"
+                okInvalid:
+                  value:
+                    ok: true
+                    curp: "XXXX000000XXXXXX00"
+                    isValid: false
+                    data: null
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/MissingKey"
+        "403":
+          $ref: "#/components/responses/InvalidKey"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    BadRequest:
+      description: Request inválido (faltan campos / formato)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            bad:
+              value:
+                ok: false
+                error: "Request inválido"
+
+    MissingKey:
+      description: Falta API key (cuando no aplica demo)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            missingKey:
+              value:
+                ok: false
+                error: "Falta header x-api-key"
+
+    InvalidKey:
+      description: API key inválida / revocada / no autorizada
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalidKey:
+              value:
+                ok: false
+                error: "API key inválida o no autorizada"
+
+    RateLimited:
+      description: Rate limit excedido (por plan o demo)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RateLimitResponse"
+          examples:
+            demoExceeded:
+              value:
+                ok: false
+                error: "Límite demo excedido (5 por día)"
+                limit: 5
+                used: 5
+                day: "2026-01-13"
+            planExceeded:
+              value:
+                ok: false
+                error: "Rate limit excedido"
+                plan: "developer"
+                limit: 5000
+                used: 5000
+                month: "2026-01"
+
+  schemas:
+    ValidateRequest:
+      type: object
+      required: [curp]
+      properties:
+        curp:
+          type: string
+          description: CURP a validar (18 caracteres)
+          example: "GODE561231HDFRRN09"
+
+    CurpData:
+      type: object
+      properties:
+        year: { type: integer, example: 1956 }
+        month: { type: integer, example: 12 }
+        day: { type: integer, example: 31 }
+        gender:
+          type: string
+          description: H (hombre) / M (mujer)
+          example: "H"
+        state:
+          type: string
+          description: Código entidad (ej. DF)
+          example: "DF"
+
+    ValidateResponse:
+      type: object
+      properties:
+        ok: { type: boolean, example: true }
+        curp: { type: string, example: "GODE561231HDFRRN09" }
+        isValid: { type: boolean, example: true }
+        data:
+          anyOf:
+            - $ref: "#/components/schemas/CurpData"
+            - type: "null"
+
+    ErrorResponse:
+      type: object
+      properties:
+        ok: { type: boolean, example: false }
+        error: { type: string, example: "Mensaje de error" }
+
+    RateLimitResponse:
+      type: object
+      properties:
+        ok: { type: boolean, example: false }
+        error: { type: string, example: "Rate limit excedido" }
+        plan: { type: string, nullable: true, example: "developer" }
+        limit: { type: integer, nullable: true, example: 5000 }
+        used: { type: integer, nullable: true, example: 5000 }
+        month: { type: string, nullable: true, example: "2026-01" }
+        day: { type: string, nullable: true, example: "2026-01-13" }
+
+
+      description: >
+        Valida estructura de CURP y extrae datos básicos (fecha, género, entidad).
+
+        **Rate limits**
+        - Demo (sin key): 5 por día por IP
+        - Free: 50 por mes por API key
+        - Developer: 5,000 por mes por API key
+        - Business: 50,000 por mes por API key
+
+        **Auth**
+        - Header: `x-api-key: curp_...`
+        - Si no se envía, el endpoint puede operar en modo demo (si está habilitado).
