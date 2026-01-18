@@ -75,7 +75,7 @@ Cuando falta API key (y no aplica demo):
 { "ok": false, "error": "Falta header x-api-key" }
 
 ### 400 Bad Request
-Request inválido (payload mal formado o faltan campos):
+Request inválido (payload mal formado o faltan campos): ```
 ```json
 { "ok": false, "error": "Request inválido" }
 
@@ -100,7 +100,7 @@ Curpify usa API Keys vía header:
 | Developer | 5,000 validaciones por mes por API key |
 | Business | 50,000 validaciones por mes por API key |
 
-> Si necesitas más volumen, contáctanos para plan a la medida.
+> Si necesitas más volumen, contáctanos para plan a la medida. ```
 
 ---
 
