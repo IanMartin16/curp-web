@@ -178,5 +178,5 @@ A3 --> B2
 A4 --> C1
 
 %% VALIDACIÓN → SERVICIO
-C1 --> C2 --> C3 --> C4 --> C5
+C1 --> C2 --> C3 --> C4 --> C5 ```
 
