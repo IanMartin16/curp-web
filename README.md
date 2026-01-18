@@ -75,7 +75,7 @@ Cuando falta API key (y no aplica demo):
 { "ok": false, "error": "Falta header x-api-key" }
 
 ### 400 Bad Request
-Request inválido (payload mal formado o faltan campos): ```
+Request inválido (payload mal formado o faltan campos): 
 ```json
 { "ok": false, "error": "Request inválido" }
 
@@ -83,7 +83,8 @@ Request inválido (payload mal formado o faltan campos): ```
 
 Curpify usa API Keys vía header:
 
-- Header: `x-api-key: curp_...```
+- Header: `x-api-key: curp_...
+```
 
 ### Modos de uso
 - **Demo (sin key):** permite validar con límite **5 por día por IP**.
@@ -100,7 +101,8 @@ Curpify usa API Keys vía header:
 | Developer | 5,000 validaciones por mes por API key |
 | Business | 50,000 validaciones por mes por API key |
 
-> Si necesitas más volumen, contáctanos para plan a la medida. ```
+> Si necesitas más volumen, contáctanos para plan a la medida. 
+```
 
 ---
 
@@ -109,7 +111,8 @@ Curpify usa API Keys vía header:
 ### 401 Unauthorized
 **Falta API key** (cuando el modo demo no aplica al endpoint).
 ```json
-{ "ok": false, "error": "Falta header x-api-key" }```
+{ "ok": false, "error": "Falta header x-api-key" }
+```
 
 
 ---
@@ -178,5 +181,6 @@ A3 --> B2
 A4 --> C1
 
 %% VALIDACIÓN → SERVICIO
-C1 --> C2 --> C3 --> C4 --> C5 ```
+C1 --> C2 --> C3 --> C4 --> C5 
+```
 
