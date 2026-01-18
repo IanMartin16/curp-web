@@ -109,7 +109,7 @@ Curpify usa API Keys vía header:
 ### 401 Unauthorized
 **Falta API key** (cuando el modo demo no aplica al endpoint).
 ```json
-{ "ok": false, "error": "Falta header x-api-key" } ```
+{ "ok": false, "error": "Falta header x-api-key" }```
 
 
 ---
