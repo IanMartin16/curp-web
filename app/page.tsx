@@ -1,7 +1,6 @@
-// app/page.tsx
-
 import Link from "next/link";
 import { DemoSection } from "./components/DemoSection";
+import ServiceHealthCompact from "./components/ServiceHealthCompact";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_CURP_API_BASE_URL || "";
 const API_KEY = process.env.NEXT_PUBLIC_CURP_API_KEY || "";
@@ -10,25 +9,27 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#020817] text-white">
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between px-6 md:px-12 py-4 border-b border-[#1f2937]">
-        <a href="/" className="text-xl font-bold">
+      <nav className="flex items-center justify-between border-b border-white/10 px-6 py-4 md:px-12">
+        <a href="/" className="text-2xl font-bold tracking-tight text-white">
           Curpify
         </a>
 
-        <div className="flex items-center gap-6 text-sm">
-          <a href="/docs" className="text-gray-300 hover:text-white">
+        <div className="flex items-center gap-4 md:gap-6 text-sm">
+          <a href="/docs" className="text-gray-300 transition hover:text-white">
             Docs
           </a>
-          <a href="/pricing" className="text-gray-300 hover:text-white">
+          <a href="/pricing" className="text-gray-300 transition hover:text-white">
             Pricing
           </a>
-          <a href="/dashboard" className="text-gray-300 hover:text-white">
+          <a href="/dashboard" className="text-gray-300 transition hover:text-white">
             Dashboard
           </a>
 
+          <ServiceHealthCompact />
+
           <a
             href="/docs"
-            className="px-4 py-2 bg-emerald-500 text-black font-semibold rounded-xl hover:bg-emerald-400 transition"
+            className="rounded-xl bg-emerald-500 px-4 py-2 font-semibold text-black transition hover:bg-emerald-400"
           >
             Probar API
           </a>

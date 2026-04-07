@@ -47,3 +47,6 @@ dist/
 !.env.example
 logs/
 data/
+
+# Docs
+curpify_lanzamiento_oficial.md

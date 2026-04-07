@@ -71,11 +71,13 @@ Curpify aplica límites por plan:
 
 ### 401 Unauthorized
 Cuando falta API key (y no aplica demo):
+```
 ```json
 { "ok": false, "error": "Falta header x-api-key" }
 
 ### 400 Bad Request
 Request inválido (payload mal formado o faltan campos): 
+```
 ```json
 { "ok": false, "error": "Request inválido" }
 
