@@ -166,7 +166,7 @@ export default function PricingPage() {
             Para equipos que necesitan volumen y estabilidad.
           </p>
 
-          <p className="text-3xl font-bold mb-1">$599 MXN</p>
+          <p className="text-3xl font-bold mb-1">$399 MXN</p>
           <p className="text-gray-400 text-xs mb-6">al mes</p>
 
           <ul className="text-sm text-gray-200 space-y-2 mb-6">
