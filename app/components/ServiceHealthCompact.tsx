@@ -14,7 +14,7 @@ type StatusSummaryResponse = {
 };
 
 const STATUS_HUB_BASE_URL =
-  process.env.NEXT_PUBLIC_STATUS_HUB_API_URL || "http://127.0.0.1:8080";
+  process.env.NEXT_PUBLIC_STATUS_HUB_API_URL || "https://status-hub-api-production.up.railway.app";
 
 function getStatusLabel(status: ServiceStatus): string {
   switch (status) {
