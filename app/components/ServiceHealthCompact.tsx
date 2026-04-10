@@ -68,7 +68,7 @@ export default function ServiceHealthCompact() {
     }
 
     load();
-    const interval = setInterval(load, 600_000);
+    const interval = setInterval(load, 3600_000);
 
     return () => {
       mounted = false;
