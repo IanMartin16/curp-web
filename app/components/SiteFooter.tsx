@@ -10,7 +10,7 @@ export function SiteFooter() {
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         Curpify © {year}. Powered by
         <p className="font-mono text-emerald-400 text-sm">
-           <a href="https://evilink.dev">evi_link.dev</a>
+           <a href="https://evilink.dev">evi_link.devs</a>
         </p>
         <p className="font-mono text-emerald-400 text-sm">support@evilink.dev</p>
 
