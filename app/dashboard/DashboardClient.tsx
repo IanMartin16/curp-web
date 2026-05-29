@@ -200,10 +200,21 @@ export default function DashboardClient() {
   }, [apiKey, usageDays]);
 
   function fmtDay(isoOrDate: string) {
-    // si viene "2026-01-13T00:00:00.000Z" o "2026-01-13"
-    const d = new Date(isoOrDate);
-    if (Number.isNaN(d.getTime())) return isoOrDate;
-    return d.toLocaleDateString("es-MX", { year: "numeric", month: "2-digit", day: "2-digit" });
+    const value = String(isoOrDate || "");
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [year, month, day] = value.split("-");
+      return `${day}/${month}/${year}`;
+    }
+
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return value;
+
+    return d.toLocaleDateString("es-MX", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
   }
 
   function Stat({ label, value }: { label: string; value: string }) {
