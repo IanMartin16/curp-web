@@ -16,12 +16,12 @@ type DemoResult = {
 
 const SAMPLE_CURPS = [
   {
-    label: "Válida",
+    label: "Ejemplo válido",
     value: "MAVM990101HDFRRL07",
   },
   {
-    label: "Dígito inválido",
-    value: "MAVM990101HDFRRL06",
+    label: "Formato inválido",
+    value: "MAVM990101XXX",
   },
 ];
 
@@ -193,14 +193,14 @@ export function DemoSection() {
                           isValid ? "text-emerald-300" : "text-amber-300"
                         }`}
                       >
-                        {isValid ? "CURP válida" : "Requiere revisión"}
+                        {isValid ? "CURP aceptada por el demo" : "Requiere revisión"}
                       </p>
 
                       <p className="mt-1 text-sm text-slate-300">
                         {result.summary ||
                           (isValid
-                            ? "La CURP fue validada correctamente."
-                            : "La CURP no pasó la validación.")}
+                            ? "La CURP cumple con la validación básica del demo."
+                            : "La CURP no pasó la validación básica del demo.")}
                       </p>
                     </div>
 

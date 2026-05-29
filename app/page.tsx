@@ -139,9 +139,10 @@ export default function HomePage() {
               Prueba Curpify sin configuración.
             </h2>
 
-            <p className="mt-3 text-sm text-slate-400">
-              Este demo no usa API key y tiene límite por IP. Para consumir tu plan,
-              utiliza el Dashboard o integra la API protegida con <span className="font-mono">x-api-key</span>.
+            <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-400 md:text-base">
+              Este demo realiza una validación básica de CURP sin API key y tiene límite por IP.
+              La validación completa CURP/RFC está disponible desde el Dashboard y la API protegida con{" "}
+              <span className="font-mono text-slate-300">x-api-key</span>.
             </p>
           </div>
 
