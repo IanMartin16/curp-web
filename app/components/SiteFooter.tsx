@@ -8,8 +8,9 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-slate-800 bg-[#020817] py-8 text-sm text-slate-400">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p className="text-center md:text-left">
-          Curpify © {year}. Powered by evi_link devs.
+        Curpify © {year}. Powered by
+        <p className="font-mono text-emerald-400 text-sm">
+           <a href="https://evilink.dev">evi_link.dev</a>
         </p>
         <p className="font-mono text-emerald-400 text-sm">support@evilink.dev</p>
 
@@ -21,7 +22,7 @@ export function SiteFooter() {
             Pricing
           </Link>
           <Link href="/#demo" className="hover:text-slate-200">
-            Demo
+            Inicio
           </Link>
           <Link href="/dashboard" className="hover:text-slate-200">
             Dashboard

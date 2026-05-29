@@ -2,17 +2,24 @@ import Link from "next/link";
 import { DemoSection } from "./components/DemoSection";
 import ServiceHealthCompact from "./components/ServiceHealthCompact";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_CURP_API_BASE_URL || "";
-const API_KEY = process.env.NEXT_PUBLIC_CURP_API_KEY || "";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#020817] text-white">
       {/* NAVBAR */}
       <nav className="flex items-center justify-between border-b border-white/10 px-6 py-4 md:px-12">
-        <a href="/" className="text-2xl font-bold tracking-tight text-white">
-          Curpify
-        </a>
+          <div className="leading-tight">
+          <a href="/" className="flex items-center gap-3">
+            <img
+              src="/curpify-logo-full.png"
+              alt="Curpify"
+              className="h-15 w-auto"
+            />
+          </a>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-300">
+            Identity Validation
+          </div>
+        </div>
 
         <div className="flex items-center gap-4 md:gap-6 text-sm">
           <a href="/docs" className="text-gray-300 transition hover:text-white">
@@ -37,55 +44,69 @@ export default function HomePage() {
       </nav>
 
       {/* HERO */}
-      <section className="text-center max-w-3xl mx-auto mt-20 px-4">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          Valida CURP en milisegundos.
+      <section className="relative overflow-hidden text-center max-w-5xl mx-auto mt-20 px-4">
+        <div className="absolute left-1/2 top-0 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <div className="mb-5 flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1 text-xs font-semibold text-emerald-300">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              Curpify v1.5 · CURP & RFC Validation
+          </span>
+        </div>
+
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-5 tracking-tight">
+          Validación de identidad para flujos de RH, onboarding y sistemas internos.
         </h1>
 
-        <p className="text-gray-300 text-lg mb-8">
-          Una API moderna, rápida y confiable para validar CURP desde cualquier
-          sistema. Perfecta para onboarding, formularios de clientes,
-          automatizaciones internas y KYC.
+        <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-3xl mx-auto">
+          Valida CURP y RFC desde una API simple o desde un dashboard listo para
+          equipos no técnicos. Rápido, medible y preparado para producción.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="#demo"
-            className="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg"
+            className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg shadow-emerald-500/10"
           >
-            Probar API sin código
+            Probar demo sin API key
           </Link>
 
           <Link
-            href="/pricing"
-            className="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold border border-slate-600 text-slate-100 hover:bg-slate-800"
+            href="/dashboard"
+            className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold border border-slate-600 text-slate-100 hover:bg-slate-800"
           >
-            Ver planes y precios
+             Ir al dashboard
+          </Link>
+
+          <Link
+            href="/docs"
+            className="inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold border border-slate-700 text-slate-300 hover:border-emerald-500/60 hover:text-emerald-300"
+          >
+            Ver docs
           </Link>
         </div>
 
-        <ul className="text-gray-300 text-sm space-y-2 mb-10 mt-8">
-          <li>✔ Respuestas inmediatas (avg &lt; 80 ms)</li>
-          <li>✔ Validación de estructura, fecha de nacimiento, género y estado</li>
-          <li>✔ Dashboard y métricas en tiempo real</li>
-          <li>✔ API Keys ilimitadas</li>
-          <li>✔ Documentación clara y estilo developer-first</li>
-        </ul>
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-slate-300">
+          <div className="rounded-2xl border border-slate-800 bg-[#020c1b]/80 p-4">
+            <p className="text-emerald-300 font-semibold">CURP + RFC</p>
+            <p className="mt-1 text-slate-400">
+              Normalización, estructura y dígito verificador.
+            </p>
+          </div>
 
-        <div className="flex justify-center gap-4">
-          <a
-            href="/docs"
-            className="px-6 py-3 bg-emerald-500 text-black rounded-xl font-semibold hover:bg-emerald-400 transition"
-          >
-            Probar la API
-          </a>
+          <div className="rounded-2xl border border-slate-800 bg-[#020c1b]/80 p-4">
+            <p className="text-emerald-300 font-semibold">Dashboard no técnico</p>
+            <p className="mt-1 text-slate-400">
+              Valida identidad sin usar Postman ni código.
+            </p>
+          </div>
 
-          <a
-            href="/docs"
-            className="px-6 py-3 border border-gray-600 text-white rounded-xl hover:border-emerald-500 hover:text-emerald-400 transition"
-          >
-            Ver documentación
-          </a>
+          <div className="rounded-2xl border border-slate-800 bg-[#020c1b]/80 p-4">
+            <p className="text-emerald-300 font-semibold">API developer-first</p>
+            <p className="mt-1 text-slate-400">
+              Consumo medido por API key y métricas en tiempo real.
+            </p>
+          </div>
         </div>
 
         {/* BADGES DE CONFIANZA */}
@@ -97,83 +118,88 @@ export default function HomePage() {
 
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-1">
             <span className="h-2 w-2 rounded-full bg-sky-400" />
-            <span>+{90} validaciones registradas en pruebas</span>
+            <span>Dashboard + API Key usage</span>
           </div>
 
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-900/70 px-4 py-1">
             <span className="h-2 w-2 rounded-full bg-violet-400" />
-            <span>Diseñado para producción y KYC</span>
+            <span>Diseñado para producción</span>
           </div>
         </div>
       </section>
 
       {/* DEMO WIDGET */}
-      <DemoSection />
+        <section id="demo" className="mt-20">
+          <div className="max-w-3xl mx-auto px-6 text-center mb-6">
+            <span className="inline-flex rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs font-semibold text-slate-300">
+              Demo público
+            </span>
+
+            <h2 className="mt-4 text-3xl font-bold">
+              Prueba Curpify sin configuración.
+            </h2>
+
+            <p className="mt-3 text-sm text-slate-400">
+              Este demo no usa API key y tiene límite por IP. Para consumir tu plan,
+              utiliza el Dashboard o integra la API protegida con <span className="font-mono">x-api-key</span>.
+            </p>
+          </div>
+
+          <DemoSection />
+        </section>
 
       {/* SECTION tipo Stripe */}
       <section className="mt-32 max-w-6xl mx-auto px-6 md:px-12 text-center">
         <h2 className="text-4xl font-bold mb-6">
-          La forma más rápida y confiable de validar CURP en México.
+          Una consola simple para validar identidad mexicana.
         </h2>
 
         <p className="text-gray-300 text-lg mb-12 max-w-3xl mx-auto">
-          Curpify ofrece una API ultra veloz, documentación clara y métricas en
-          tiempo real. Perfecta para onboarding, formularios, procesos de
-          identidad y plataformas que requieren validación inmediata.
+          Curpify combina API, dashboard y métricas para validar CURP y RFC en flujos
+          de RH, onboarding, formularios y sistemas internos.
         </p>
 
         {/* FEATURES GRID */}
         <div className="grid md:grid-cols-3 gap-8 text-left">
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-2">
-              Validación instantánea
-            </h3>
+            <h3 className="text-xl font-semibold mb-2">Validación CURP/RFC</h3>
             <p className="text-gray-300 text-sm">
-              Promedio menor a 80ms. Perfecto para formularios y procesos
-              críticos.
+              Normalización, estructura, fecha y dígito verificador en una respuesta clara.
             </p>
           </div>
 
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-2">
-              Integración en minutos
-            </h3>
+            <h3 className="text-xl font-semibold mb-2">Dashboard para equipos</h3>
             <p className="text-gray-300 text-sm">
-              Ejemplos claros en cURL, Node, Python y PHP. Implementa rápido.
+              Valida identidad desde la consola sin depender de integraciones técnicas.
             </p>
           </div>
 
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-2">
-              Validación completa
-            </h3>
+            <h3 className="text-xl font-semibold mb-2">API para developers</h3>
             <p className="text-gray-300 text-sm">
-              Estructura, fecha, género, estado y dígito verificador.
+              Integra Curpify con HTTP estándar, API keys y consumo medido por plan.
             </p>
           </div>
 
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-2">
-              Dashboard en tiempo real
-            </h3>
+            <h3 className="text-xl font-semibold mb-2">Métricas en tiempo real</h3>
             <p className="text-gray-300 text-sm">
-              Métricas por día, por API key y consumo total.
+              Consulta uso diario, validaciones recientes y consumo mensual.
             </p>
           </div>
 
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-2">
-              Diseñado para producción
-            </h3>
+            <h3 className="text-xl font-semibold mb-2">Control por API key</h3>
             <p className="text-gray-300 text-sm">
-              Logs internos, monitoreo y límites configurados.
+              Cada validación queda asociada a una key activa y a su plan correspondiente.
             </p>
           </div>
 
           <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-xl font-semibold mb-2">Escalable</h3>
+            <h3 className="text-xl font-semibold mb-2">Listo para soft launch</h3>
             <p className="text-gray-300 text-sm">
-              Desde 500 hasta miles de validaciones mensuales.
+              Pensado para pruebas reales, feedback temprano y adopción gradual.
             </p>
           </div>
         </div>
@@ -195,53 +221,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* BENEFICIOS */}
-      <section className="mt-24 max-w-5xl mx-auto px-6 md:px-12">
-        <h2 className="text-3xl font-bold mb-6 text-center">
-          ¿Por qué elegir Curpify?
-        </h2>
-
-        <div className="grid md:grid-cols-3 gap-6 text-gray-300 text-sm">
-          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-2 text-white">
-              Ultra rápido
-            </h3>
-            <p>
-              Validación optimizada con tiempos promedio menores a 80ms, ideal
-              para formularios en tiempo real.
-            </p>
-          </div>
-
-          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-2 text-white">
-              Fácil de integrar
-            </h3>
-            <p>
-              API REST simple, ejemplos en múltiples lenguajes y documentación
-              estilo Stripe.
-            </p>
-          </div>
-
-          <div className="bg-[#020c1b] border border-[#1f2937] rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-2 text-white">
-              Listo para producción
-            </h3>
-            <p>
-              Dashboard de uso, métricas en tiempo real y soporte para API Keys
-              ilimitadas.
-            </p>
-          </div>
-        </div>
-      </section> {/* 👈 cierre que faltaba */}
-
       {/* EJEMPLOS DE INTEGRACIÓN */}
       <section className="mt-24 max-w-5xl mx-auto px-6 md:px-12">
         <h2 className="text-3xl font-bold mb-4 text-center">
           Ejemplos de uso en producción
         </h2>
         <p className="text-gray-300 mb-8 text-center max-w-2xl mx-auto">
-          Integra Curpify en minutos usando HTTP estándar. Aquí tienes ejemplos
-          en <span className="font-semibold">cURL</span> y{" "}
+          Integra Curpify en minutos usando HTTP estándar. El endpoint clasico de CURP sigue disponible 
+          para mantener compatibilidad con integraciones existentes.
+          <span className="font-semibold">cURL</span> y{" "}
           <span className="font-semibold">JavaScript (fetch)</span>.
         </p>
 
@@ -257,7 +245,7 @@ export default function HomePage() {
               </span>
             </div>
             <pre className="text-xs whitespace-pre-wrap text-slate-100">
-{`curl -X POST https://curp-api-production.up.railway.app/api/curp/validate \\
+              {`curl -X POST https://curp-api-production.up.railway.app/api/curp/validate \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: TU_API_KEY_AQUI" \\
   -d '{ "curp": "BUMA920505MDFJLK09" }'`}
@@ -275,7 +263,7 @@ export default function HomePage() {
               </span>
             </div>
             <pre className="text-xs whitespace-pre-wrap text-slate-100">
-{`async function validarCurp(curp) {
+              {`async function validarCurp(curp) {
   const res = await fetch(
     "https://curp-api-production.up.railway.app/api/curp/validate",
     {
@@ -296,53 +284,10 @@ export default function HomePage() {
         </div>
 
         <p className="text-xs text-slate-400 mt-4 text-center">
-          Tip: en producción usa tu propia API key desde el dashboard de
-          Curpify. En el plan Free tienes hasta 500 validaciones mensuales.
+          Tip: para validacion CURP/RFC desde interfaz visual, usa el Dashboard. Para integraciones existentes
+          el endpoint clasico de CURP continúa disponible.
         </p>
-      </section>
-
-      {/* HISTORIA */}
-      <section className="mt-24 max-w-4xl mx-auto px-6 md:px-12">
-        <h2 className="text-3xl font-bold mb-4">Nuestra historia</h2>
-
-        <p className="text-gray-300 mb-4">
-          Curpify nace como respuesta a una necesidad real: validar CURP de
-          forma rápida, clara y accesible. Miles de sistemas en México requieren
-          validación de identidad, pero se enfrentan a procesos lentos, manuales
-          o poco confiables.
-        </p>
-
-        <p className="text-gray-300 mb-4">
-          Nosotros creemos que la validación de identidad debe ser tan simple
-          como hacer un request a una API. Así comenzó Curpify: una plataforma
-          pensada para desarrolladores, optimizada para la velocidad y lista
-          para producción.
-        </p>
-
-        <h3 className="text-2xl font-semibold mt-8 mb-3">Misión</h3>
-        <p className="text-gray-300 mb-4">
-          Hacer que la validación de identidad en México sea rápida, accesible y
-          sencilla para todos los desarrolladores.
-        </p>
-
-        <h3 className="text-2xl font-semibold mt-8 mb-3">Visión</h3>
-        <p className="text-gray-300 mb-4">
-          Construir la plataforma número uno de validación de identidad en
-          México y Latinoamérica, empezando por CURP y expandiéndonos hacia RFC,
-          NSS, INE digital y validaciones avanzadas.
-        </p>
-
-        <h3 className="text-2xl font-semibold mt-8 mb-3">Valores</h3>
-        <ul className="text-gray-300 space-y-2">
-          <li>✔ Simplicidad</li>
-          <li>✔ Velocidad</li>
-          <li>✔ Confiabilidad</li>
-          <li>✔ Transparencia</li>
-          <li>✔ Developer-first</li>
-        </ul>
       </section>
     </div>
   );
 }
-
-
