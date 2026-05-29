@@ -62,6 +62,7 @@ export default function DashboardClient() {
   const [identityLoading, setIdentityLoading] = useState(false);
   const [identityResult, setIdentityResult] = useState<IdentityValidationResult | null>(null);
   const [identityErr, setIdentityErr] = useState<string | null>(null);
+  const [ copiedIdentity, setCopiedIdentity ] = useState(false);
 
   
 
@@ -263,6 +264,7 @@ async function validateIdentityFromDashboard() {
   setIdentityLoading(true);
   setIdentityErr(null);
   setIdentityResult(null);
+  setCopiedIdentity(false);
 
   try {
     const r = await fetch("/api/dashboard/validate-identity", {
@@ -308,6 +310,20 @@ await refreshDashboardData(apiKey);
   }
 }
 
+async function copyNormalizedIdentity() {
+  if (!identityResult?.normalized) return;
+
+  try {
+    await navigator.clipboard.writeText(identityResult.normalized);
+    setCopiedIdentity(true);
+
+    setTimeout(() => {
+      setCopiedIdentity(false);
+    }, 1500);
+  } catch (e) {
+    console.warn("No pude copiar el identificador", e);
+  }
+}
 
   const masked = summary?.masked || maskedLocal;
 
@@ -500,8 +516,21 @@ await refreshDashboardData(apiKey);
 
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div className="rounded-lg border border-slate-800 bg-black/20 p-3">
-                        <p className="text-slate-400 text-xs">Valor normalizado</p>
-                        <p className="font-mono text-slate-100 mt-1 break-all">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-slate-400 text-xs">Valor normalizado</p>
+
+                          {identityResult.normalized && (
+                            <button
+                              type="button"
+                              onClick={copyNormalizedIdentity}
+                              className="rounded-full border border-slate-700 bg-black/30 px-3 py-1 text-xs text-slate-300 transition hover:border-emerald-500/60 hover:text-emerald-300"
+                            >
+                              {copiedIdentity ? "Copiado" : "Copiar"}
+                            </button>
+                          )}
+                        </div>
+
+                        <p className="font-mono text-slate-100 mt-2 break-all">
                           {identityResult.normalized || "-"}
                         </p>
                       </div>
