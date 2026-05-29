@@ -70,7 +70,7 @@ export function DemoSection() {
 
   const isValid =
     result?.valid === true ||
-    result?.ok === true ||
+    result?.isValid === true ||
     result?.status === "valid";
 
   return (
@@ -211,7 +211,7 @@ export function DemoSection() {
                           : "border-amber-500/30 bg-amber-500/10 text-amber-300"
                       }`}
                     >
-                      {isValid ? "200 OK" : "Validación fallida"}
+                      {isValid ? "Aceptada" : "No válida"}
                     </span>
                   </div>
 
@@ -219,6 +219,14 @@ export function DemoSection() {
                     <summary className="cursor-pointer text-sm text-slate-300 hover:text-white">
                       Ver respuesta JSON
                     </summary>
+
+                    {!isValid && result?.reasons?.length > 0 && (
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-200">
+                        {result.reasons.map((reason: string, idx: number) => (
+                          <li key={idx}>{reason}</li>
+                        ))}
+                      </ul>
+                    )}
 
                     <pre className="mt-3 whitespace-pre-wrap text-xs text-slate-100">
                       {JSON.stringify(result, null, 2)}
