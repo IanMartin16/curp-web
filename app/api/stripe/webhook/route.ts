@@ -18,14 +18,23 @@ async function syncSubscription(
       ? item.price.product
       : item?.price?.product?.id ?? null;
 
-  /*
-   * En algunas versiones/configuraciones de Stripe el final del periodo
-   * puede venir en el item. Como respaldo usamos cancel_at.
-   */
+  const cancelAt =
+    typeof subscription.cancel_at === "number"
+      ? subscription.cancel_at
+      : null;
+
   const currentPeriodEnd =
-    item?.current_period_end ??
-    subscription.cancel_at ??
-    null;
+    typeof item?.current_period_end === "number"
+      ? item.current_period_end
+      : null;
+
+  const scheduledCancellation =
+    subscription.cancel_at_period_end === true ||
+    cancelAt !== null;
+
+  const accessEndsAt =
+    cancelAt ??
+    (scheduledCancellation ? currentPeriodEnd : null);
 
   const response = await fetch(
     `${process.env.CURP_API_BASE_URL}/api/stripe/sync-subscription`,
@@ -39,9 +48,11 @@ async function syncSubscription(
       body: JSON.stringify({
         subscriptionId: subscription.id,
         status: subscription.status,
-        cancelAtPeriodEnd:
-          subscription.cancel_at_period_end ?? false,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        scheduledCancellation,
+        cancelAt,
         currentPeriodEnd,
+        accessEndsAt,
         priceId,
         productId,
       }),
