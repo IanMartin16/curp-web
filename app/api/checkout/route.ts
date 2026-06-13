@@ -4,7 +4,9 @@ import { stripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
-const PRICES: Record<string, string | undefined> = {
+type PaidPlan = "developer" | "business";
+
+const PRICES: Record<PaidPlan, string | undefined> = {
   developer: process.env.STRIPE_PRICE_DEV,
   business: process.env.STRIPE_PRICE_BUS,
 };
@@ -12,10 +14,13 @@ const PRICES: Record<string, string | undefined> = {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const plan = body?.plan as "developer" | "business" | "free" | undefined;
 
-    // El plan FREE no pasa por Stripe
-    if (plan === "free") {
+    const rawPlan =
+      typeof body?.plan === "string"
+        ? body.plan.trim().toLowerCase()
+        : "";
+
+    if (rawPlan === "free") {
       return NextResponse.json(
         {
           ok: false,
@@ -25,56 +30,88 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!plan || !PRICES[plan]) {
+    if (rawPlan !== "developer" && rawPlan !== "business") {
       return NextResponse.json(
         {
           ok: false,
-          error: `Plan inválido o price ID no configurado: ${plan}`,
+          error: `Plan inválido: ${rawPlan || "missing"}`,
         },
         { status: 400 }
       );
     }
 
-    if (!process.env.STRIPE_SUCCESS_URL || !process.env.STRIPE_CANCEL_URL) {
+    const plan: PaidPlan = rawPlan;
+    const priceId = PRICES[plan];
+
+    if (!priceId) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Faltan STRIPE_SUCCESS_URL o STRIPE_CANCEL_URL",
+          error: `Price ID no configurado para el plan ${plan}`,
         },
         { status: 500 }
       );
     }
 
-    const BASE_URL = process.env.APP_URL || "https://curpify.com";
+    const successUrl = process.env.STRIPE_SUCCESS_URL;
+    const cancelUrl = process.env.STRIPE_CANCEL_URL;
 
-    console.log("SUCCESS_URL =", process.env.STRIPE_SUCCESS_URL);
-    console.log("CANCEL_URL  =", process.env.STRIPE_CANCEL_URL);
+    if (!successUrl || !cancelUrl) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Faltan STRIPE_SUCCESS_URL o STRIPE_CANCEL_URL",
+        },
+        { status: 500 }
+      );
+    }
 
+    console.info("curpify_checkout_starting", {
+      plan,
+      priceId,
+    });
 
-    // Crear sesión de checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
+
       line_items: [
         {
-          price: PRICES[plan]!,
+          price: priceId,
           quantity: 1,
         },
       ],
-      success_url: `${BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${BASE_URL}/pricing?canceled=1`,
+
+      success_url: successUrl,
+      cancel_url: cancelUrl,
 
       metadata: {
+        product: "curpify",
         plan,
       },
+
       subscription_data: {
         metadata: {
+          product: "curpify",
           plan,
         },
       },
-
-      // Opcional: para luego relacionar con cliente
-      // customer_email: "test@example.com",
     });
+
+    if (!session.url) {
+      console.error("curpify_checkout_missing_url", {
+        sessionId: session.id,
+        plan,
+      });
+
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Stripe no devolvió una URL de checkout",
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json(
       {
@@ -83,8 +120,20 @@ export async function POST(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Error en /api/checkout:", error);
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Error desconocido";
+
+    console.error("curpify_checkout_failed", {
+      message,
+      stack:
+        error instanceof Error
+          ? error.stack
+          : undefined,
+    });
+
     return NextResponse.json(
       {
         ok: false,
@@ -97,7 +146,10 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json(
-    { ok: false, error: "Método no permitido" },
+    {
+      ok: false,
+      error: "Método no permitido",
+    },
     { status: 405 }
   );
 }
