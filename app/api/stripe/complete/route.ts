@@ -93,5 +93,3 @@ export async function GET(req: NextRequest) {
     return json(500, { ok: false, error: e?.message || "complete failed" });
   }
 }
-
-
