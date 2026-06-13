@@ -159,6 +159,8 @@ export async function GET(req: NextRequest) {
       responseOk: fulfillResp.ok,
       dataOk: fulfillData?.ok ?? false,
       existing: fulfillData?.existing ?? null,
+      error: fulfillData?.error ?? null,
+      debug: fulfillData,
     });
 
     if (!fulfillResp.ok || !fulfillData?.ok) {
