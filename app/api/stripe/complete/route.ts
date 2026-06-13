@@ -33,8 +33,12 @@ async function safeJson(
 }
 
 export async function GET(req: NextRequest) {
+  let stage = "start";
+
   const sessionId =
     req.nextUrl.searchParams.get("session_id");
+
+    stage = "validate-stripe-session";
 
   try {
     if (!sessionId) {
@@ -61,6 +65,8 @@ export async function GET(req: NextRequest) {
     console.info("stripe_complete_started", {
       sessionId,
     });
+
+    stage = "retrieve-stripe-session";
 
     let session;
 
@@ -119,6 +125,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    stage = "fulfill";
     const fulfillResp = await fetch(
       `${CURP_API_BASE}/api/stripe/fulfill`,
       {
@@ -139,6 +146,7 @@ export async function GET(req: NextRequest) {
       }
     );
 
+    stage = "parse-fulfill";
     const fulfillData = await safeJson(
       fulfillResp,
       "fulfill"
@@ -163,6 +171,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    stage = "reveal-once";
     const revealResp = await fetch(
       `${CURP_API_BASE}/api/stripe/reveal-once?session_id=${encodeURIComponent(sessionId)}`,
       {
@@ -173,10 +182,13 @@ export async function GET(req: NextRequest) {
       }
     );
 
+    stage = "parse-reveal";
     const revealData = await safeJson(
       revealResp,
       "reveal-once"
     );
+
+    stage = "completed";
 
     console.info("stripe_complete_reveal_response", {
       sessionId,
